@@ -10,6 +10,38 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Data & UI Improvements (October 17, 2025)
+- ✅ **Customer Dashboard Enhancement**: Added total spent calculation
+  - Now displays total amount spent from completed orders only
+  - Shows both total orders count and total spent side-by-side in profile section
+  - Real-time calculation from Firebase order data
+- ✅ **Admin Service Management Redesign**: Converted to global service management
+  - **BREAKING CHANGE**: Services are now global, not launderer-specific
+  - Admin can create, edit, and delete services that appear in all new orders
+  - Full CRUD operations with Firebase integration
+  - Modern UI with service cards, search functionality
+  - Services include: name, price, description, and icon
+- ✅ **Admin Complaints Page**: Removed all dummy data
+  - Now 100% Firebase real-time data from `disputes` collection
+  - Live ticket updates with status tracking (pending, in_progress, resolved)
+  - Reply functionality with timestamp tracking
+  - Empty state when no complaints exist
+  - Stats cards show real counts (total, pending, active, resolved)
+- ✅ **Admin Payments/Revenue Page**: Removed dummy data
+  - All percentage indicators and fake trends removed
+  - Real revenue calculation from completed orders
+  - Pending orders count now shows actual pending orders (not fake amount)
+  - Charts populated with real Firebase order data
+  - Monthly revenue trend based on actual order dates
+- ✅ **Admin Order Management**: Enhanced mobile-first design
+  - Modern gradient cards with improved spacing and shadows
+  - Better visual hierarchy with icons and badges
+  - Customer info displayed in highlighted cards
+  - Order items shown in clean grid layout
+  - Enhanced launderer selection with star ratings
+  - Loading states with skeleton components
+  - Improved status badges with better colors
+
 ### Local Development Setup & Firestore Index Fix (October 17, 2025)
 - ✅ **Environment Configuration**: Created centralized `.env` setup for local development
   - Added `.env.example` with all Firebase variables template
