@@ -20,6 +20,12 @@ dist-ssr
 # Attached assets and temporary files
 attached_assets/
 
+# Android signing files - NEVER commit these!
+*.jks
+*.keystore
+android/app/keystore.properties
+android/app/google-services.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -21,8 +21,8 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Optional: Add signing config here after generating keystore
-            // signingConfig signingConfigs.release
+            // Signing config enabled (uses keystore.properties file)
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
@@ -30,15 +30,32 @@ android {
         }
     }
     
-    // Optional: Add signing configs (configure after creating keystore)
+    // Signing configs - IMPORTANT: Never commit passwords to version control!
+    // Option 1: Uncomment and fill in your values
     // signingConfigs {
     //     release {
-    //         storeFile file('path/to/your-keystore.jks')
-    //         storePassword 'your-store-password'
-    //         keyAlias 'your-key-alias'
-    //         keyPassword 'your-key-password'
+    //         storeFile file('shinecycle-release.jks')
+    //         storePassword 'YOUR_STORE_PASSWORD'
+    //         keyAlias 'shinecycle'
+    //         keyPassword 'YOUR_KEY_PASSWORD'
     //     }
     // }
+    
+    // Option 2: Use environment variables (more secure)
+    signingConfigs {
+        release {
+            def keystorePropertiesFile = file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
 }
 
 repositories {
