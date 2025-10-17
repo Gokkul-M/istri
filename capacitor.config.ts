@@ -12,10 +12,17 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
     captureInput: true,
-    webContentsDebuggingEnabled: true
+    webContentsDebuggingEnabled: true,
+    // Optimize for production builds
+    minWebViewVersion: 55,
+    // Enable hardware acceleration
+    webViewRenderProcessStrategy: 'best-effort'
   },
   ios: {
-    allowsLinkPreview: false
+    allowsLinkPreview: false,
+    // iOS specific optimizations
+    scrollEnabled: true,
+    webContentsDebuggingEnabled: true
   },
   plugins: {
     SplashScreen: {
@@ -28,6 +35,15 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
+    },
+    Camera: {
+      saveToGallery: true,
+      allowEditing: true,
+      quality: 90
+    },
+    Geolocation: {
+      timeout: 10000,
+      enableHighAccuracy: true
     }
   }
 };
