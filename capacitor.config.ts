@@ -14,9 +14,7 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: true,
     // Optimize for production builds
-    minWebViewVersion: 55,
-    // Enable hardware acceleration
-    webViewRenderProcessStrategy: 'best-effort'
+    minWebViewVersion: 55
   },
   ios: {
     allowsLinkPreview: false,
