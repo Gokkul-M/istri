@@ -18,10 +18,27 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Optional: Add signing config here after generating keystore
+            // signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    
+    // Optional: Add signing configs (configure after creating keystore)
+    // signingConfigs {
+    //     release {
+    //         storeFile file('path/to/your-keystore.jks')
+    //         storePassword 'your-store-password'
+    //         keyAlias 'your-key-alias'
+    //         keyPassword 'your-key-password'
+    //     }
+    // }
 }
 
 repositories {
