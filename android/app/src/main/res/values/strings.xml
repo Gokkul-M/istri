@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ShineCycle</string>
+    <string name="title_activity_main">ShineCycle</string>
+    <string name="package_name">com.shinecycle.laundry</string>
+    <string name="custom_url_scheme">com.shinecycle.laundry</string>
+</resources>

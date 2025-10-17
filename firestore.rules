@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile and any other authenticated user can read profiles
+      allow read: if isAuthenticated();
+      
+      // Users can create their own profile during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can update their own profile
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can delete their own profile
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Addresses subcollection
+      match /addresses/{addressId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+    
+    // User settings collection
+    match /userSettings/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Services collection
+    match /services/{serviceId} {
+      // Anyone authenticated can read services
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can create, update, delete services (simplified for now)
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      // Anyone authenticated can read orders (role-based filtering in app)
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can create orders
+      allow create: if isAuthenticated();
+      
+      // Anyone authenticated can update orders
+      allow update: if isAuthenticated();
+      
+      // Anyone authenticated can delete orders
+      allow delete: if isAuthenticated();
+    }
+    
+    // Coupons collection
+    match /coupons/{couponId} {
+      // Anyone authenticated can read coupons
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can manage coupons (simplified)
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // Disputes collection
+    match /disputes/{disputeId} {
+      // Anyone authenticated can read disputes
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can create disputes
+      allow create: if isAuthenticated();
+      
+      // Anyone authenticated can update disputes
+      allow update: if isAuthenticated();
+      
+      // Anyone authenticated can delete disputes
+      allow delete: if isAuthenticated();
+    }
+    
+    // Messages collection
+    match /messages/{messageId} {
+      // Anyone authenticated can read messages
+      allow read: if isAuthenticated();
+      
+      // Anyone authenticated can create messages
+      allow create: if isAuthenticated();
+      
+      // Anyone authenticated can update messages
+      allow update: if isAuthenticated();
+      
+      // Anyone authenticated can delete messages
+      allow delete: if isAuthenticated();
+    }
+  }
+}

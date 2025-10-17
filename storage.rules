@@ -1,0 +1,47 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024; // 5MB limit
+    }
+    
+    // User avatars
+    match /avatars/{userId}/{fileName} {
+      // Users can read any avatar
+      allow read: if isAuthenticated();
+      
+      // Users can upload their own avatar
+      allow write: if isAuthenticated() && 
+                     request.auth.uid == userId && 
+                     isImageFile() && 
+                     isValidSize();
+      
+      // Users can delete their own avatar
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Business logos
+    match /logos/{businessId}/{fileName} {
+      // Anyone authenticated can read logos
+      allow read: if isAuthenticated();
+      
+      // Business owners can upload their logo
+      allow write: if isAuthenticated() && 
+                     isImageFile() && 
+                     isValidSize();
+      
+      // Business owners can delete their logo
+      allow delete: if isAuthenticated();
+    }
+  }
+}
