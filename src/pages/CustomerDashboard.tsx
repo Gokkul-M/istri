@@ -39,6 +39,11 @@ const CustomerDashboard = () => {
     order.status === "in_progress"
   ).slice(0, 3);
 
+  // Calculate total spent from completed orders
+  const totalSpent = orders
+    .filter(order => order.status === "completed")
+    .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with gradient */}
@@ -63,9 +68,15 @@ const CustomerDashboard = () => {
                       <p className="text-white/80 text-sm">{user?.email || user?.phone || ""}</p>
                     </div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                    <p className="text-white/70 text-xs">Total Orders</p>
-                    <p className="text-white font-bold text-lg">{ordersLoading ? "..." : orders.length}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                      <p className="text-white/70 text-xs">Total Orders</p>
+                      <p className="text-white font-bold text-lg">{ordersLoading ? "..." : orders.length}</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                      <p className="text-white/70 text-xs">Total Spent</p>
+                      <p className="text-white font-bold text-lg">₹{ordersLoading ? "..." : totalSpent}</p>
+                    </div>
                   </div>
                 </div>
 

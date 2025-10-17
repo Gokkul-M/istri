@@ -72,8 +72,7 @@ const PaymentsRevenue = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Revenue</p>
-                <h3 className="text-xl font-bold">₹{(totalRevenue/1000).toFixed(0)}k</h3>
-                <p className="text-xs text-tertiary">+18.7% ↑</p>
+                <h3 className="text-xl font-bold">₹{totalRevenue >= 1000 ? `${(totalRevenue/1000).toFixed(1)}k` : totalRevenue}</h3>
               </div>
             </div>
           </CardContent>
@@ -86,9 +85,8 @@ const PaymentsRevenue = () => {
                 <CreditCard className="w-4 h-4 text-secondary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Orders</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
                 <h3 className="text-xl font-bold">{completedOrders.length}</h3>
-                <p className="text-xs text-tertiary">+23.1% ↑</p>
               </div>
             </div>
           </CardContent>
@@ -103,7 +101,6 @@ const PaymentsRevenue = () => {
               <div>
                 <p className="text-xs text-muted-foreground">Avg Value</p>
                 <h3 className="text-xl font-bold">₹{Math.round(avgOrderValue)}</h3>
-                <p className="text-xs text-tertiary">+5.2% ↑</p>
               </div>
             </div>
           </CardContent>
@@ -117,8 +114,7 @@ const PaymentsRevenue = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Pending</p>
-                <h3 className="text-xl font-bold">₹8.4k</h3>
-                <p className="text-xs text-destructive">-12% ↓</p>
+                <h3 className="text-xl font-bold">{orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length}</h3>
               </div>
             </div>
           </CardContent>

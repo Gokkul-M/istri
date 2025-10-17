@@ -1,54 +1,128 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Trash2, Edit2, Package, DollarSign, Loader2 } from "lucide-react";
-import { useFirebaseUsers } from "@/hooks/useFirebaseUsers";
 import { useFirebaseServices } from "@/hooks/useFirebaseServices";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ServicesManagement = () => {
-  const { users, loading: usersLoading } = useFirebaseUsers();
-  const { services, loading: servicesLoading } = useFirebaseServices();
+  const { services, loading, addService, updateService, deleteService } = useFirebaseServices();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedLaunderer, setSelectedLaunderer] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingService, setEditingService] = useState<any>(null);
+  
+  // Form states
   const [serviceName, setServiceName] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
-  
-  const loading = usersLoading || servicesLoading;
-  const launderers = users.filter(u => u.role === 'launderer');
+  const [serviceIcon, setServiceIcon] = useState("");
 
-  const filteredLaunderers = launderers.filter(launderer =>
-    launderer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    launderer.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredServices = services.filter(service =>
+    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddService = () => {
-    if (!selectedLaunderer || !serviceName || !servicePrice) {
+  const handleAddService = async () => {
+    if (!serviceName || !servicePrice) {
       toast.error("Please fill all required fields");
       return;
     }
     
-    toast.success("Service assigned to launderer successfully");
-    setIsAddDialogOpen(false);
-    setSelectedLaunderer("");
+    try {
+      await addService({
+        name: serviceName,
+        price: Number(servicePrice),
+        description: serviceDescription,
+        icon: serviceIcon || 'package',
+      });
+      
+      toast.success("Service added successfully");
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error adding service:", error);
+      toast.error("Failed to add service");
+    }
+  };
+
+  const handleEditService = async () => {
+    if (!editingService || !serviceName || !servicePrice) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+    
+    try {
+      await updateService(editingService.id, {
+        name: serviceName,
+        price: Number(servicePrice),
+        description: serviceDescription,
+        icon: serviceIcon || 'package',
+      });
+      
+      toast.success("Service updated successfully");
+      setIsEditDialogOpen(false);
+      setEditingService(null);
+      resetForm();
+    } catch (error) {
+      console.error("Error updating service:", error);
+      toast.error("Failed to update service");
+    }
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    if (!confirm("Are you sure you want to delete this service?")) return;
+    
+    try {
+      await deleteService(serviceId);
+      toast.success("Service deleted successfully");
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      toast.error("Failed to delete service");
+    }
+  };
+
+  const openEditDialog = (service: any) => {
+    setEditingService(service);
+    setServiceName(service.name);
+    setServicePrice(service.price.toString());
+    setServiceDescription(service.description || "");
+    setServiceIcon(service.icon || "");
+    setIsEditDialogOpen(true);
+  };
+
+  const resetForm = () => {
     setServiceName("");
     setServicePrice("");
     setServiceDescription("");
+    setServiceIcon("");
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 space-y-4 pb-20">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-20 rounded-[1.5rem]" />
+          <Skeleton className="h-20 rounded-[1.5rem]" />
+        </div>
+        <Skeleton className="h-12 rounded-lg" />
+        <Skeleton className="h-32 rounded-[1.5rem]" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4 pb-20">
       <div>
         <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent tracking-tight">Services Management</h1>
-        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">Assign services to launderers</p>
+        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">Manage global laundry services</p>
       </div>
 
       {/* Stats */}
@@ -73,8 +147,10 @@ const ServicesManagement = () => {
                 <DollarSign className="w-4 h-4 text-secondary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Launderers</p>
-                <h3 className="text-xl font-bold">{launderers.length}</h3>
+                <p className="text-xs text-muted-foreground">Avg Price</p>
+                <h3 className="text-xl font-bold">
+                  ₹{services.length > 0 ? Math.round(services.reduce((sum, s) => sum + s.price, 0) / services.length) : 0}
+                </h3>
               </div>
             </div>
           </CardContent>
@@ -86,135 +162,196 @@ const ServicesManagement = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search launderers..."
+            placeholder="Search services..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        
+        {/* Add Service Dialog */}
+        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+          setIsAddDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
-            <Button size="icon">
+            <Button size="icon" className="shrink-0">
               <Plus className="w-4 h-4" />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Assign Service to Launderer</DialogTitle>
+              <DialogTitle>Add New Service</DialogTitle>
               <DialogDescription>
-                Add a new service offering to a launderer's profile
+                Create a new laundry service that will be available for all orders
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Select Launderer</Label>
-                <Select value={selectedLaunderer} onValueChange={setSelectedLaunderer}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a launderer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {launderers.map((launderer) => (
-                      <SelectItem key={launderer.id} value={launderer.id}>
-                        {launderer.businessName} - {launderer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Service Name *</Label>
+                <Input
+                  placeholder="e.g., Dry Cleaning, Ironing"
+                  value={serviceName}
+                  onChange={(e) => setServiceName(e.target.value)}
+                />
               </div>
               <div>
-                <Label>Service Type</Label>
-                <Select value={serviceName} onValueChange={setServiceName}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {services.map((service) => (
-                      <SelectItem key={service.id} value={service.name}>
-                        {service.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Custom Price (₹)</Label>
+                <Label>Price (₹) *</Label>
                 <Input
                   type="number"
-                  placeholder="Enter custom price"
+                  placeholder="Enter price per piece"
                   value={servicePrice}
                   onChange={(e) => setServicePrice(e.target.value)}
                 />
               </div>
               <div>
-                <Label>Description (Optional)</Label>
-                <Input
-                  placeholder="Additional details..."
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Service description..."
                   value={serviceDescription}
                   onChange={(e) => setServiceDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Icon Name (optional)</Label>
+                <Input
+                  placeholder="e.g., sparkles, washing-machine, iron"
+                  value={serviceIcon}
+                  onChange={(e) => setServiceIcon(e.target.value)}
                 />
               </div>
               <Button onClick={handleAddService} className="w-full">
-                Assign Service
+                Add Service
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Service Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingService(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Service</DialogTitle>
+              <DialogDescription>
+                Update service details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Service Name *</Label>
+                <Input
+                  placeholder="e.g., Dry Cleaning, Ironing"
+                  value={serviceName}
+                  onChange={(e) => setServiceName(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Price (₹) *</Label>
+                <Input
+                  type="number"
+                  placeholder="Enter price per piece"
+                  value={servicePrice}
+                  onChange={(e) => setServicePrice(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Service description..."
+                  value={serviceDescription}
+                  onChange={(e) => setServiceDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Icon Name (optional)</Label>
+                <Input
+                  placeholder="e.g., sparkles, washing-machine, iron"
+                  value={serviceIcon}
+                  onChange={(e) => setServiceIcon(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleEditService} className="w-full">
+                Update Service
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Launderers List */}
-      <div className="space-y-3">
-        {filteredLaunderers.map((launderer) => (
-          <Card key={launderer.id} className="border-none shadow-medium rounded-[1.5rem]">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-bold text-lg">
-                      {launderer.businessName?.charAt(0) || launderer.name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{launderer.businessName}</p>
-                    <p className="text-sm text-muted-foreground">{launderer.name}</p>
-                  </div>
-                </div>
-                <Badge variant="secondary">Active</Badge>
-              </div>
-
-              <div className="space-y-2 mb-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Base Price/Kg</span>
-                  <span className="font-semibold text-primary">₹{launderer.pricePerKg}/kg</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Services Offered</span>
-                  <Badge variant="outline">{services.length} services</Badge>
-                </div>
-              </div>
-
-              {/* Services List */}
-              <div className="space-y-2 pt-3 border-t border-border">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">Available Services:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {services.slice(0, 4).map((service) => (
-                    <div key={service.id} className="flex items-center justify-between bg-muted/50 rounded-lg p-2">
-                      <span className="text-xs">{service.name}</span>
-                      <span className="text-xs font-semibold text-primary">₹{service.price}</span>
+      {/* Services List */}
+      {filteredServices.length === 0 ? (
+        <Card className="border-none shadow-medium rounded-[1.5rem] p-12 text-center">
+          <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <h3 className="text-xl font-semibold mb-2">No Services Found</h3>
+          <p className="text-muted-foreground mb-4">
+            {searchQuery ? "Try a different search term" : "Get started by adding your first service"}
+          </p>
+          {!searchQuery && (
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add First Service
+            </Button>
+          )}
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filteredServices.map((service) => (
+            <Card key={service.id} className="border-none shadow-medium rounded-[1.5rem]">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Package className="w-6 h-6 text-primary" />
                     </div>
-                  ))}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg">{service.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {service.description || "No description"}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className="bg-tertiary/10 text-tertiary hover:bg-tertiary/20">
+                          ₹{service.price}/piece
+                        </Badge>
+                        {service.icon && (
+                          <Badge variant="outline" className="text-xs">
+                            {service.icon}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 ml-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditDialog(service)}
+                      className="h-9 w-9"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteService(service.id)}
+                      className="h-9 w-9 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex gap-2 mt-3">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Edit2 className="w-3 h-3 mr-1" />
-                  Edit Services
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
