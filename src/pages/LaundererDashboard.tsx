@@ -8,6 +8,7 @@ import { QRScannerModal } from "@/components/QRScannerModal";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   QrCode,
@@ -26,7 +27,8 @@ import {
 } from "lucide-react";
 
 const LaundererDashboard = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { orders, loading, updateOrder } = useFirebaseOrders();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [processingOrders, setProcessingOrders] = useState<Set<string>>(new Set());
@@ -201,7 +203,14 @@ const LaundererDashboard = () => {
 
                 {/* Logout Button */}
                 <div className="p-4 border-t border-border">
-                  <button className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group">
+                  <button 
+                    onClick={async () => {
+                      await signOut();
+                      navigate('/login');
+                    }}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group"
+                    data-testid="button-logout"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
                       <LogOut className="w-5 h-5 text-red-500" />
                     </div>
