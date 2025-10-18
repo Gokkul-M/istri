@@ -23,10 +23,14 @@ import {
 } from "lucide-react";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
+import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
+import { useNavigate } from "react-router-dom";
 
 const CustomerDashboard = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { orders, loading: ordersLoading } = useFirebaseOrders();
+  const { coupons, loading: couponsLoading } = useFirebaseCoupons();
   const services = [
     { name: "Dry Clean", icon: Sparkles, color: "bg-primary" },
     { name: "Laundry", icon: WashingMachine, color: "bg-secondary" },
@@ -124,16 +128,6 @@ const CustomerDashboard = () => {
                     </Link>
 
                     <Link
-                      to="/customer/payments"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted transition-all group"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">
-                        <Receipt className="w-5 h-5 text-foreground" />
-                      </div>
-                      <span className="font-semibold text-foreground">Payment Methods</span>
-                    </Link>
-
-                    <Link
                       to="/customer/settings"
                       className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted transition-all group"
                     >
@@ -147,7 +141,14 @@ const CustomerDashboard = () => {
 
                 {/* Logout Button */}
                 <div className="p-4 border-t border-border">
-                  <button className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group">
+                  <button 
+                    onClick={async () => {
+                      await signOut();
+                      navigate('/login');
+                    }}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group"
+                    data-testid="button-logout"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
                       <LogOut className="w-5 h-5 text-red-500" />
                     </div>
@@ -203,24 +204,34 @@ const CustomerDashboard = () => {
               </Button>
             </Link>
           </div>
-          <Link to="/customer/new-order?coupon=IRON40" data-testid="link-promotion-card">
-            <Card className="gradient-accent rounded-[2rem] p-5 border-0 relative overflow-hidden shadow-medium hover-lift cursor-pointer transition-all">
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-soft">
-                    <Tag className="w-6 h-6 text-white" />
+          {couponsLoading ? (
+            <Skeleton className="h-24 rounded-[2rem]" />
+          ) : coupons.length > 0 ? (
+            <Link to={`/customer/new-order?coupon=${coupons[0].code}`} data-testid="link-promotion-card">
+              <Card className="gradient-accent rounded-[2rem] p-5 border-0 relative overflow-hidden shadow-medium hover-lift cursor-pointer transition-all">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-soft">
+                      <Tag className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-base mb-0.5">{coupons[0].description}</p>
+                      <p className="text-white/95 text-sm font-medium">CODE: {coupons[0].code}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white font-semibold text-base mb-0.5">Get 40% off Ironing</p>
-                    <p className="text-white/95 text-sm font-medium">CODE: IRON40</p>
-                  </div>
+                  <Button size="sm" className="bg-white/95 text-accent hover:bg-white font-semibold shadow-soft" data-testid="button-book-now-promo">
+                    Book Now
+                  </Button>
                 </div>
-                <Button size="sm" className="bg-white/95 text-accent hover:bg-white font-semibold shadow-soft" data-testid="button-book-now-promo">
-                  Book Now
-                </Button>
+              </Card>
+            </Link>
+          ) : (
+            <Card className="gradient-accent rounded-[2rem] p-5 border-0 relative overflow-hidden shadow-medium">
+              <div className="flex items-center justify-center relative z-10">
+                <p className="text-white text-sm">No active promotions at the moment</p>
               </div>
             </Card>
-          </Link>
+          )}
         </div>
 
         {/* Active Orders */}
