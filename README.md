@@ -1,3 +1,4 @@
+npm installnode -vGit add .
 # 🌟 ShineCycle - Laundry Service Platform
 
 <div align="center">
