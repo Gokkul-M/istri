@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useFirebaseAuth";
 import {
   LayoutDashboard,
   Users,
@@ -40,6 +41,8 @@ const navItems = [
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const isActivePath = (path: string) => {
     if (path === "/admin") {
@@ -114,7 +117,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
                 {/* Logout Button */}
                 <div className="p-4 border-t border-border">
-                  <button className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group">
+                  <button 
+                    onClick={async () => {
+                      await signOut();
+                      navigate('/login');
+                    }}
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group"
+                    data-testid="button-logout"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
                       <LogOut className="w-5 h-5 text-red-500" />
                     </div>
