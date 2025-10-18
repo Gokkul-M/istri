@@ -10,6 +10,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Firebase Integration & UX Improvements (October 18, 2025)
+- ✅ **Special Promotions Real-Time Data**: Customer dashboard now fetches live coupons
+  - Replaced hardcoded promotion with Firebase coupons from admin panel
+  - Uses useFirebaseCoupons hook to fetch active coupons in real-time
+  - Displays first active coupon with description and code
+  - Shows empty state when no active promotions exist
+  - Loading skeleton while fetching data
+- ✅ **Logout Functionality**: Added working logout for all user roles
+  - Customer sidebar: Logout redirects to login page after signOut
+  - Launderer sidebar: Logout redirects to login page after signOut
+  - Admin sidebar: Logout redirects to login page after signOut
+  - Uses Firebase Auth signOut method from useAuth hook
+  - All logout buttons include data-testid for testing
+- ✅ **Customer Navigation Cleanup**: Removed payment methods from sidebar
+  - Payment Methods link removed from customer sidebar navigation
+  - Streamlined navigation with only essential features
+  - Better user experience with focused navigation
+
 ### Android White Screen Fix (October 18, 2025)
 - ✅ **Fixed Vite Base Path**: Added `base: './'` to vite.config.ts
   - Critical fix for Capacitor apps to use relative asset paths
