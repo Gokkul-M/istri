@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Android White Screen Fix (October 18, 2025)
+- ✅ **Fixed Vite Base Path**: Added `base: './'` to vite.config.ts
+  - Critical fix for Capacitor apps to use relative asset paths
+  - Resolves white screen issue when loading APK on Android devices
+- ✅ **Changed to HashRouter**: Switched from BrowserRouter to HashRouter
+  - Better compatibility with Android WebView
+  - More reliable routing in mobile Capacitor apps
+- ✅ **Mobile Build Optimizations**: Added Terser minification and console stripping
+  - Production builds drop console logs automatically
+  - Optimized chunk sizes for mobile performance
+- ✅ **Documentation**: Created ANDROID_WHITE_SCREEN_FIX.md with debugging guide
+  - Complete rebuild instructions
+  - Chrome DevTools inspection guide
+  - Common error solutions
+
 ### Android Mobile App Configuration (October 17, 2025)
 - ✅ **Capacitor Android Setup**: Complete configuration for Play Store deployment
   - Updated capacitor.config.ts with optimized Android settings

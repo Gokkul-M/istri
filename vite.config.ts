@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // CRITICAL: Use relative paths for Capacitor mobile apps
+  base: './',
   server: {
     host: "0.0.0.0",
     port: 5000,
@@ -18,5 +20,16 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    // Optimize for mobile
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+      },
+    },
+    // Chunk size warnings for mobile
+    chunkSizeWarningLimit: 1000,
   },
 }));
