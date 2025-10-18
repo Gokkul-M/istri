@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.shinecycle.laundry',
+  appId: 'com.istri.laundry',
   appName: 'ShineCycle',
   webDir: 'dist',
   server: {

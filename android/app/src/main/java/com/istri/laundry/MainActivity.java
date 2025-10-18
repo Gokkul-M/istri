@@ -1,4 +1,4 @@
-package com.shinecycle.laundry;
+package com.istri.laundry;
 
 import com.getcapacitor.BridgeActivity;
 
