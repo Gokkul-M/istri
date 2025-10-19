@@ -96,15 +96,38 @@ service cloud.firestore {
       return request.auth != null && getCustomId() == customId;
     }
     
+    // Validate custom ID format matches the role
+    function customIdMatchesRole(customId, role) {
+      return (role == 'customer' && customId.matches('^CUST-[0-9]{4}$')) ||
+             (role == 'launderer' && customId.matches('^LAUN-[0-9]{4}$')) ||
+             (role == 'admin' && customId.matches('^ADMIN-[0-9]{4}$'));
+    }
+    
+    // Extract role from custom ID prefix
+    function getRoleFromCustomId(customId) {
+      return customId.matches('^CUST-.*') ? 'customer' :
+             customId.matches('^LAUN-.*') ? 'launderer' :
+             customId.matches('^ADMIN-.*') ? 'admin' : null;
+    }
+    
     // Users collection - now uses custom IDs as document IDs
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow update: if isAuthenticated() && 
-                      (isOwnerByCustomId(userId) || isAdmin());
+                      (isOwnerByCustomId(userId) || isAdmin()) &&
+                      // Prevent role changes except by admin
+                      (request.resource.data.role == resource.data.role || isAdmin());
       allow delete: if isAdmin();
-      // Create is handled during signup - must match Firebase UID
+      // Create is handled during signup
       allow create: if isAuthenticated() && 
-                       request.resource.data.firebaseUid == request.auth.uid;
+                       // Must match Firebase UID
+                       request.resource.data.firebaseUid == request.auth.uid &&
+                       // Custom ID must match document ID
+                       request.resource.data.id == userId &&
+                       // Role must match custom ID prefix
+                       customIdMatchesRole(userId, request.resource.data.role) &&
+                       // Only existing admins can create admin users
+                       (request.resource.data.role != 'admin' || isAdmin());
       
       // User addresses subcollection
       match /addresses/{addressId} {
@@ -125,9 +148,15 @@ service cloud.firestore {
     match /userMapping/{firebaseUid} {
       allow read: if isAuthenticated() && 
                      (isOwnerByFirebaseUid(firebaseUid) || isAdmin());
-      // Only allow creation by the owner during signup
+      // Only allow creation by owner with valid format
       allow create: if isAuthenticated() && 
-                       isOwnerByFirebaseUid(firebaseUid);
+                       isOwnerByFirebaseUid(firebaseUid) &&
+                       // Custom ID must have valid format (CUST/LAUN/ADMIN-####)
+                       (request.resource.data.customId.matches('^CUST-[0-9]{4}$') ||
+                        request.resource.data.customId.matches('^LAUN-[0-9]{4}$') ||
+                        request.resource.data.customId.matches('^ADMIN-[0-9]{4}$')) &&
+                       // Only existing admins can create ADMIN-* mappings
+                       (!request.resource.data.customId.matches('^ADMIN-.*') || isAdmin());
       // Updates/deletes forbidden (mappings are immutable)
       allow update, delete: if false;
     }
@@ -136,9 +165,15 @@ service cloud.firestore {
     // CRITICAL: Must match the corresponding userMapping entry
     match /customIdMapping/{customId} {
       allow read: if isAuthenticated();
-      // Only allow creation when creating userMapping in same transaction
+      // Only allow creation with valid format and matching Firebase UID
       allow create: if isAuthenticated() && 
-                       request.resource.data.firebaseUid == request.auth.uid;
+                       request.resource.data.firebaseUid == request.auth.uid &&
+                       // Custom ID (doc ID) must have valid format
+                       (customId.matches('^CUST-[0-9]{4}$') ||
+                        customId.matches('^LAUN-[0-9]{4}$') ||
+                        customId.matches('^ADMIN-[0-9]{4}$')) &&
+                       // Only existing admins can create ADMIN-* mappings
+                       (!customId.matches('^ADMIN-.*') || isAdmin());
       // Updates/deletes forbidden (mappings are immutable)
       allow update, delete: if false;
     }
@@ -196,14 +231,114 @@ service cloud.firestore {
 }
 ```
 
+## First Admin Bootstrapping
+
+**IMPORTANT**: Before deploying these security rules, you must create the first admin user manually because the rules prevent users from self-promoting to admin.
+
+### Option 1: Using Firebase Console (Recommended)
+
+1. **Create Firebase Auth user**:
+   - Go to Firebase Console → Authentication → Users → Add User
+   - Create user with admin email/password
+   - Note the Firebase UID (e.g., `abc123xyz...`)
+
+2. **Create counter document** (if doesn't exist):
+   - Go to Firestore Database → Start collection: `counters`
+   - Document ID: `userIdCounters`
+   - Fields: `admin: 0`, `customer: 0`, `launderer: 0`
+
+3. **Create admin user document**:
+   - Collection: `users`
+   - Document ID: `ADMIN-0001`
+   - Fields:
+     ```
+     id: "ADMIN-0001"
+     firebaseUid: "<paste Firebase UID from step 1>"
+     role: "admin"
+     name: "Admin Name"
+     email: "admin@example.com"
+     phone: "+1234567890"
+     address: "Admin Address"
+     pinCode: "12345"
+     isActive: true
+     ```
+
+4. **Create mapping documents**:
+   - Collection: `userMapping`
+   - Document ID: `<paste Firebase UID>`
+   - Fields: `customId: "ADMIN-0001"`, `createdAt: <current timestamp>`
+   
+   - Collection: `customIdMapping`
+   - Document ID: `ADMIN-0001`
+   - Fields: `firebaseUid: "<paste Firebase UID>"`, `createdAt: <current timestamp>`
+
+5. **Update counter**:
+   - Edit `counters/userIdCounters`
+   - Set `admin: 1`
+
+### Option 2: Using Firebase Admin SDK
+
+```javascript
+// Run this once with Firebase Admin SDK
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+async function createFirstAdmin() {
+  const auth = admin.auth();
+  const db = admin.firestore();
+  
+  // Create Firebase Auth user
+  const userRecord = await auth.createUser({
+    email: 'admin@example.com',
+    password: 'securePassword123',
+  });
+  
+  const customId = 'ADMIN-0001';
+  
+  // Create user document
+  await db.collection('users').doc(customId).set({
+    id: customId,
+    firebaseUid: userRecord.uid,
+    role: 'admin',
+    name: 'Admin Name',
+    email: 'admin@example.com',
+    phone: '+1234567890',
+    address: 'Admin Address',
+    pinCode: '12345',
+    isActive: true,
+  });
+  
+  // Create mappings
+  await db.collection('userMapping').doc(userRecord.uid).set({
+    customId: customId,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  
+  await db.collection('customIdMapping').doc(customId).set({
+    firebaseUid: userRecord.uid,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  
+  // Update counter
+  await db.collection('counters').doc('userIdCounters').set({
+    admin: 1,
+    customer: 0,
+    launderer: 0,
+  });
+  
+  console.log('First admin created successfully!');
+}
+```
+
 ## Migration Workflow
 
-1. **Update Security Rules** in Firebase Console first
-2. **Access Admin Panel** → Navigate to `/admin/migration`
-3. **Check Status** - View how many users need migration
-4. **Run Migration** - Click "Start Migration" button
-5. **Verify Results** - Check that all users were migrated successfully
-6. **Test Authentication** - Try logging in and creating orders with the new IDs
+1. **Create First Admin** (if needed) - Use one of the methods above
+2. **Update Security Rules** in Firebase Console with the rules from this document
+3. **Access Admin Panel** → Login with admin credentials, navigate to `/admin/migration`
+4. **Check Status** - View how many users need migration
+5. **Run Migration** - Click "Start Migration" button
+6. **Verify Results** - Check that all users were migrated successfully
+7. **Test Authentication** - Try logging in and creating orders with the new IDs
 
 ## Troubleshooting
 
