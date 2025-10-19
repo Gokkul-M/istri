@@ -10,6 +10,29 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Profile Pages Real-Time Data Integration (October 19, 2025)
+- ✅ **Launderer Business Profile Page**:
+  - Replaced all hardcoded dummy data with real-time Firebase data
+  - Added business statistics card showing: Total Orders, Completed Orders, Total Revenue, Average Rating
+  - All form fields now load from and save to Firebase (businessName, email, phone, businessAddress, businessDescription, businessHours)
+  - Business logo upload with real-time preview
+  - Loading skeleton for better UX
+  - Toast notifications for save success/errors
+  - Statistics auto-update via useFirebaseOrders hook
+- ✅ **Customer Profile Page**:
+  - Added customer statistics card: Total Orders, Completed Orders, Total Spent
+  - Enhanced account information with real member-since date
+  - Created formatMemberSince function to safely handle Firestore Timestamps and Date objects
+  - Customer ID display for easy reference
+  - Toast notifications for save success/errors
+  - All data updates in real-time via Firebase listeners
+- ✅ **Order Scoping**:
+  - useFirebaseOrders hook automatically filters orders by user role
+  - Launderers see only their assigned orders (laundererId match)
+  - Customers see only their orders (customerId match)
+  - Admins see all orders
+  - Statistics calculations use user-scoped data only
+
 ### Launderer Dashboard Real Data Integration (October 19, 2025)
 - ✅ **Removed Dummy Data from Sidebar**:
   - Business name now displays real data from user profile (`businessName` or `name` field)
