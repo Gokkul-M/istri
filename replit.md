@@ -10,6 +10,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Admin Coupon Management Enhancements (October 19, 2025)
+- ✅ **Edit Coupon Functionality**:
+  - Full edit dialog with all coupon fields (code, discount, description, valid dates, usage limit)
+  - Loading states during update operations
+  - Real-time updates using Firebase onSnapshot
+  - Error handling with user feedback via toast notifications
+- ✅ **Delete Coupon with Confirmation**:
+  - AlertDialog confirmation before deletion
+  - Prevents accidental coupon removal
+  - Loading states during delete operations
+  - Fixed controlled dialog bug for proper open/close behavior
+- ✅ **Enhanced Activate/Deactivate Toggle**:
+  - Async error handling for status updates
+  - Improved toast messages for better user feedback
+  - Real-time status changes reflected instantly
+- ✅ **Real-Time CRUD Operations**:
+  - All create, update, delete, and toggle operations use Firebase methods
+  - Changes reflect instantly via onSnapshot listeners
+  - No manual page refresh required
+
 ### Real-Time Updates & Error Handling (October 19, 2025)
 - ✅ **Address Auto-Selection in NewOrder**:
   - Auto-selects default address on initial page load
