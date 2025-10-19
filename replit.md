@@ -4,6 +4,15 @@
 
 ShineCycle is a comprehensive laundry service platform connecting customers with laundry service providers for doorstep pickup and delivery. It offers business management tools for launderers and full administrative oversight. Key features include a mobile-first design, real-time order tracking, QR code verification, and role-based access control. The platform aims to streamline laundry operations, enhance user experience, and capture a significant share of the on-demand laundry market.
 
+## Recent Changes
+
+**October 19, 2025 - Customer Portal UI Enhancements**
+- Fixed Order Again card navigation in Customer Dashboard (corrected route from `/customer/orders/:id` to `/customer/order/:id`)
+- Added profile picture upload functionality to Settings page with file validation and toast notifications
+- Enhanced OrderHistory page styling with gradient cards, improved spacing, and better mobile responsiveness
+- Enhanced OrderDetails page styling with consistent card design, better visual hierarchy, and improved mobile padding
+- All changes use real-time Firebase data through `useProfile` and `useFirebaseOrders` hooks
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -31,6 +40,10 @@ Preferred communication style: Simple, everyday language.
 - Responsive bottom navigation for mobile
 - QR code generation/scanning for order verification
 - Real-time order status timeline with skeleton loading states
+- Gradient card backgrounds with backdrop blur for modern glass-morphism effect
+- Consistent rounded corners (2rem border-radius) across all cards
+- Hover effects (shadow-soft to shadow-medium transitions) for interactive elements
+- Mobile-optimized spacing (pb-20 for bottom navigation clearance)
 
 ### Authentication & Authorization
 
@@ -57,6 +70,8 @@ Preferred communication style: Simple, everyday language.
 
 **Firebase Storage:**
 - User avatar and business logo uploads in `profile-images/{userId}/{filename}`
+- Avatar upload integrated in customer Settings page with file type validation
+- Real-time profile picture updates via `useProfile` hook's `uploadProfileImage` function
 
 ### Mobile App Support
 
