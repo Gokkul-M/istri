@@ -16,7 +16,7 @@ Preferred communication style: Simple, everyday language.
   - Format: `CUST-0001`, `LAUN-0001`, `ADMIN-0001`
   - Thread-safe ID generation using Firestore transactions
   - Bidirectional mapping between Firebase UIDs and custom IDs
-- ✅ **Updated Authentication Flow**:
+- ✅ **Updated Authentication Flow** (`src/lib/firebase/auth.ts`):
   - Modified signup to generate custom IDs automatically
   - User documents now use custom IDs as document IDs
   - Firebase UID stored as reference field (`firebaseUid`)
@@ -26,16 +26,24 @@ Preferred communication style: Simple, everyday language.
   - Updates all related documents (orders, disputes, messages, addresses)
   - Maintains data integrity and relationships
   - Admin UI at `/admin/migration` for easy migration
+- ✅ **Security Model** (`FIRESTORE_RULES.md`):
+  - Prevents privilege escalation and identity forgery
+  - Only admins can create ADMIN-* IDs
+  - Custom ID format validation (regex-based)
+  - Role must match ID prefix (CUST/LAUN/ADMIN)
+  - Immutable mappings prevent identity hijacking
+  - Comprehensive security rules for all collections
 - ✅ **New Firestore Collections**:
-  - `counters`: Tracks next ID number for each role
-  - `userMapping`: Firebase UID → Custom ID lookup
-  - `customIdMapping`: Custom ID → Firebase UID reverse lookup
+  - `counters/userIdCounters`: Tracks next ID number for each role
+  - `userMapping/{firebaseUid}`: Firebase UID → Custom ID lookup
+  - `customIdMapping/{customId}`: Custom ID → Firebase UID reverse lookup
 - ✅ **Database Schema Updates**:
   - User.id: Now contains custom ID (CUST-0001, etc.)
   - User.firebaseUid: New field storing Firebase Auth UID
   - All user references use custom IDs consistently
 - ⚠️ **Required Setup**:
-  - Firestore security rules must be updated (see FIRESTORE_RULES.md)
+  - **CRITICAL**: First admin must be created manually before deploying rules (see FIRESTORE_RULES.md)
+  - Firestore security rules must be updated from FIRESTORE_RULES.md
   - Migration must be run for existing users via Admin panel at `/admin/migration`
   - Composite indexes still needed (addresses, disputes, orders)
 
