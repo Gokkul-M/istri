@@ -83,7 +83,6 @@ const Settings = () => {
 
   const handlePermissionToggle = async (type: 'location' | 'camera' | 'gallery', value: boolean) => {
     if (!value) {
-      // Just save to settings if turning off
       await updatePermission(type, false);
       return;
     }
@@ -92,9 +91,9 @@ const Settings = () => {
     try {
       if (type === 'location') {
         const permission = await Geolocation.checkPermissions();
-        if (permission.location === 'denied') {
+        if (permission.location !== 'granted') {
           const request = await Geolocation.requestPermissions();
-          if (request.location === 'granted' || request.location === 'prompt') {
+          if (request.location === 'granted') {
             await updatePermission(type, true);
           } else {
             toast({
@@ -109,9 +108,17 @@ const Settings = () => {
         }
       } else if (type === 'camera' || type === 'gallery') {
         const permission = await CapacitorCamera.checkPermissions();
-        if (permission.camera === 'denied' || permission.photos === 'denied') {
+        const needsRequest = type === 'camera' 
+          ? permission.camera !== 'granted' 
+          : permission.photos !== 'granted';
+        
+        if (needsRequest) {
           const request = await CapacitorCamera.requestPermissions();
-          if (request.camera === 'granted' || request.photos === 'granted') {
+          const isGranted = type === 'camera'
+            ? request.camera === 'granted'
+            : request.photos === 'granted';
+          
+          if (isGranted) {
             await updatePermission(type, true);
           } else {
             toast({

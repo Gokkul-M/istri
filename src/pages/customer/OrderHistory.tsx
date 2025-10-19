@@ -10,10 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { IndexMissingError } from "@/components/IndexMissingError";
 
 const OrderHistory = () => {
   const { toast } = useToast();
-  const { orders: allOrders, loading } = useFirebaseOrders();
+  const { orders: allOrders, loading, error } = useFirebaseOrders();
 
   const completedOrders = allOrders.filter(order => order.status === "completed" || order.status === "cancelled");
   const activeOrders = allOrders.filter(order => 
@@ -83,7 +84,9 @@ const OrderHistory = () => {
           </TabsList>
 
           <TabsContent value="active" className="space-y-3">
-            {loading ? (
+            {error && (error as any).code === 'failed-precondition' ? (
+              <IndexMissingError message="Your orders require a database index to be created. Please create the required index for the 'orders' collection." />
+            ) : loading ? (
               <>
                 <Skeleton className="h-32 rounded-[2rem]" />
                 <Skeleton className="h-32 rounded-[2rem]" />
@@ -123,7 +126,9 @@ const OrderHistory = () => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-3">
-            {loading ? (
+            {error && (error as any).code === 'failed-precondition' ? (
+              <IndexMissingError message="Your orders require a database index to be created. Please create the required index for the 'orders' collection." />
+            ) : loading ? (
               <>
                 <Skeleton className="h-32 rounded-[2rem]" />
                 <Skeleton className="h-32 rounded-[2rem]" />

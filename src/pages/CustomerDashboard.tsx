@@ -25,11 +25,12 @@ import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
 import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
 import { useNavigate } from "react-router-dom";
+import { IndexMissingError } from "@/components/IndexMissingError";
 
 const CustomerDashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { orders, loading: ordersLoading } = useFirebaseOrders();
+  const { orders, loading: ordersLoading, error: ordersError } = useFirebaseOrders();
   const { coupons, loading: couponsLoading } = useFirebaseCoupons();
   const services = [
     { name: "Dry Clean", icon: Sparkles, color: "bg-primary" },
@@ -244,7 +245,9 @@ const CustomerDashboard = () => {
               </Button>
             </Link>
           </div>
-          {ordersLoading ? (
+          {ordersError && (ordersError as any).code === 'failed-precondition' ? (
+            <IndexMissingError message="Your orders require a database index to be created. Please create the required index for the 'orders' collection." />
+          ) : ordersLoading ? (
             <div className="space-y-3">
               <Skeleton className="h-24 rounded-[2rem]" />
               <Skeleton className="h-24 rounded-[2rem]" />
