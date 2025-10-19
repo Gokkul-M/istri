@@ -227,6 +227,18 @@ service cloud.firestore {
       allow read, write: if isAuthenticated() && 
                            (isOwnerByCustomId(userId) || isAdmin());
     }
+    
+    // Notifications - users can read their own, admins can create
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == getCustomId() || isAdmin());
+      allow create: if isAuthenticated() && 
+                       (request.resource.data.userId == getCustomId() || isAdmin());
+      allow update: if isAuthenticated() && 
+                       (resource.data.userId == getCustomId() || isAdmin());
+      allow delete: if isAuthenticated() && 
+                       (resource.data.userId == getCustomId() || isAdmin());
+    }
   }
 }
 ```

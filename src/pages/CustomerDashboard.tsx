@@ -24,14 +24,19 @@ import {
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
 import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useStore } from "@/store/useStore";
 import { useNavigate } from "react-router-dom";
 import { IndexMissingError } from "@/components/IndexMissingError";
 
 const CustomerDashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { currentUser } = useStore();
   const { orders, loading: ordersLoading, error: ordersError } = useFirebaseOrders();
   const { coupons, loading: couponsLoading } = useFirebaseCoupons();
+  const { notifications } = useNotifications(currentUser?.id || null);
+  
   const services = [
     { name: "Dry Clean", icon: Sparkles, color: "bg-primary" },
     { name: "Laundry", icon: WashingMachine, color: "bg-secondary" },
@@ -48,6 +53,9 @@ const CustomerDashboard = () => {
   const totalSpent = orders
     .filter(order => order.status === "completed")
     .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+  
+  // Get unread notification count
+  const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -308,11 +316,16 @@ const CustomerDashboard = () => {
               <p className="text-sm text-muted-foreground mt-1">Total Spent</p>
             </Card>
             <Link to="/customer/notifications">
-              <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer hover-lift">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
+              <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer hover-lift relative">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3 relative">
                   <Bell className="w-6 h-6 text-accent" />
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                    </span>
+                  )}
                 </div>
-                <p className="text-2xl font-bold tracking-tight">0</p>
+                <p className="text-2xl font-bold tracking-tight">{unreadNotifications}</p>
                 <p className="text-sm text-muted-foreground mt-1">Notifications</p>
               </Card>
             </Link>
