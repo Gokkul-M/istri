@@ -14,6 +14,7 @@ import { auth } from './config';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './config';
 import type { User, UserRole } from '@/store/useStore';
+import { generateCustomId, createUserMapping, getCustomIdFromFirebaseUid } from './idGenerator';
 
 export class AuthService {
   private recaptchaVerifier: RecaptchaVerifier | null = null;
@@ -88,8 +89,17 @@ export class AuthService {
         throw new Error('No user is currently signed in');
       }
 
-      // Delete user profile from Firestore
-      await deleteDoc(doc(db, 'users', user.uid));
+      // Get custom ID from Firebase UID
+      const customId = await getCustomIdFromFirebaseUid(user.uid);
+      
+      if (customId) {
+        // Delete user profile from Firestore using custom ID
+        await deleteDoc(doc(db, 'users', customId));
+        
+        // Delete mappings
+        await deleteDoc(doc(db, 'userMapping', user.uid));
+        await deleteDoc(doc(db, 'customIdMapping', customId));
+      }
 
       // Delete Firebase Auth account
       await deleteUser(user);
@@ -103,9 +113,17 @@ export class AuthService {
     return onAuthStateChanged(auth, callback);
   }
 
-  async getUserProfile(uid: string): Promise<User | null> {
+  async getUserProfile(firebaseUid: string): Promise<User | null> {
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      // Get custom ID from Firebase UID
+      const customId = await getCustomIdFromFirebaseUid(firebaseUid);
+      if (!customId) {
+        console.log('No custom ID mapping found for Firebase UID:', firebaseUid);
+        return null;
+      }
+
+      // Fetch user profile using custom ID
+      const userDoc = await getDoc(doc(db, 'users', customId));
       if (userDoc.exists()) {
         return userDoc.data() as User;
       }
@@ -116,13 +134,21 @@ export class AuthService {
     }
   }
 
-  async createUserProfile(uid: string, userData: Omit<User, 'id'>) {
+  async createUserProfile(firebaseUid: string, userData: Omit<User, 'id'>) {
     try {
+      // Generate custom ID based on role
+      const customId = await generateCustomId(userData.role);
+
+      // Create mapping between Firebase UID and custom ID
+      await createUserMapping(firebaseUid, customId);
+
+      // Create user profile with custom ID as document ID
       const user: User = {
-        id: uid,
+        id: customId,
+        firebaseUid: firebaseUid, // Store Firebase UID for reference
         ...userData,
       };
-      await setDoc(doc(db, 'users', uid), user);
+      await setDoc(doc(db, 'users', customId), user);
       return user;
     } catch (error) {
       console.error('Error creating user profile:', error);

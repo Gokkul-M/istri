@@ -6,7 +6,8 @@ export type UserRole = 'customer' | 'launderer' | 'admin';
 export type OrderStatus = 'pending' | 'confirmed' | 'picked_up' | 'in_progress' | 'ready' | 'out_for_delivery' | 'completed' | 'cancelled';
 
 export interface User {
-  id: string;
+  id: string; // Custom ID (CUST-0001, LAUN-0001, etc.)
+  firebaseUid?: string; // Firebase Auth UID (stored for reference)
   role: UserRole;
   name: string;
   email: string;
