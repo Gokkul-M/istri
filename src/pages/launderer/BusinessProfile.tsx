@@ -1,32 +1,110 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Camera, Save, MapPin, Phone, Mail, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Camera, Save, MapPin, Phone, Mail, Clock, TrendingUp, DollarSign, Star, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useStore } from "@/store/useStore";
+import { useProfile } from "@/hooks/useProfile";
+import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 
 const BusinessProfile = () => {
   const { toast } = useToast();
-  const [profile, setProfile] = useState({
-    businessName: "Fresh Laundry Co.",
-    email: "contact@freshlaundry.com",
-    phone: "+1 234 567 8900",
-    address: "456 Business Avenue, Suite 200",
-    city: "New York, NY 10001",
-    description: "Premium laundry service with same-day delivery. We specialize in eco-friendly cleaning solutions.",
-    hours: "Mon-Sat: 8:00 AM - 8:00 PM, Sun: 10:00 AM - 6:00 PM",
-    logo: ""
+  const { currentUser } = useStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { profile, loading, uploading, updateProfile, uploadProfileImage } = useProfile(currentUser?.id || null);
+  const { orders } = useFirebaseOrders();
+  
+  const [formData, setFormData] = useState({
+    businessName: "",
+    email: "",
+    phone: "",
+    businessAddress: "",
+    businessDescription: "",
+    businessHours: "",
   });
 
-  const handleSave = () => {
-    toast({
-      title: "Profile Updated",
-      description: "Your business profile has been updated successfully.",
-    });
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        businessName: profile.businessName || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        businessAddress: profile.businessAddress || "",
+        businessDescription: profile.businessDescription || "",
+        businessHours: profile.businessHours || "",
+      });
+    }
+  }, [profile]);
+
+  const businessStats = useMemo(() => {
+    const completedOrders = orders.filter(o => o.status === "completed");
+    const totalRevenue = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
+    
+    const ordersWithRatings = completedOrders.filter(order => order.rating && order.rating > 0);
+    const averageRating = ordersWithRatings.length > 0
+      ? (ordersWithRatings.reduce((acc, order) => acc + (order.rating || 0), 0) / ordersWithRatings.length).toFixed(1)
+      : '0';
+    
+    return {
+      totalOrders: orders.length,
+      completedOrders: completedOrders.length,
+      totalRevenue,
+      averageRating,
+    };
+  }, [orders]);
+
+  const handleSave = async () => {
+    try {
+      await updateProfile(formData);
+      toast({
+        title: "Success",
+        description: "Business profile updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update business profile",
+        variant: "destructive",
+      });
+    }
   };
+
+  const handleLogoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadProfileImage(file, 'businessLogo');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-6">
+        <div className="gradient-primary p-6 pb-8 rounded-b-[3rem] mb-6">
+          <div className="flex items-center justify-between mb-8">
+            <Skeleton className="w-10 h-10 rounded-full" />
+            <Skeleton className="w-40 h-6" />
+            <div className="w-10" />
+          </div>
+          <div className="flex justify-center">
+            <Skeleton className="w-28 h-28 rounded-3xl" />
+          </div>
+        </div>
+        <div className="px-6 space-y-4">
+          <Skeleton className="w-full h-64 rounded-[2rem]" />
+          <Skeleton className="w-full h-64 rounded-[2rem]" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-6">
@@ -45,9 +123,9 @@ const BusinessProfile = () => {
         {/* Logo */}
         <div className="flex justify-center">
           <div className="relative">
-            <div className="w-28 h-28 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              {profile.logo ? (
-                <img src={profile.logo} alt="Business Logo" className="w-full h-full rounded-3xl object-cover" />
+            <div className="w-28 h-28 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+              {profile?.businessLogo ? (
+                <img src={profile.businessLogo} alt="Business Logo" className="w-full h-full rounded-3xl object-cover" />
               ) : (
                 <div className="text-center">
                   <p className="text-white text-xs">Business</p>
@@ -55,14 +133,63 @@ const BusinessProfile = () => {
                 </div>
               )}
             </div>
-            <button className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow-lg">
+            <button 
+              onClick={handleLogoClick}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow-lg hover:bg-accent/90 transition-colors disabled:opacity-50"
+            >
               <Camera className="w-5 h-5 text-white" />
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </div>
       </div>
 
       <div className="px-6 space-y-4">
+        {/* Business Statistics */}
+        <Card className="rounded-3xl p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10">
+          <h3 className="font-bold mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            Business Statistics
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-background/50 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="w-4 h-4 text-blue-500" />
+                <p className="text-xs text-muted-foreground">Total Orders</p>
+              </div>
+              <p className="text-2xl font-bold">{businessStats.totalOrders}</p>
+            </div>
+            <div className="bg-background/50 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="w-4 h-4 text-green-500" />
+                <p className="text-xs text-muted-foreground">Completed</p>
+              </div>
+              <p className="text-2xl font-bold">{businessStats.completedOrders}</p>
+            </div>
+            <div className="bg-background/50 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-emerald-500" />
+                <p className="text-xs text-muted-foreground">Total Revenue</p>
+              </div>
+              <p className="text-2xl font-bold">${businessStats.totalRevenue.toFixed(2)}</p>
+            </div>
+            <div className="bg-background/50 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="w-4 h-4 text-yellow-500" />
+                <p className="text-xs text-muted-foreground">Avg Rating</p>
+              </div>
+              <p className="text-2xl font-bold">{businessStats.averageRating} ⭐</p>
+            </div>
+          </div>
+        </Card>
+
         <Card className="rounded-3xl p-6">
           <h3 className="font-bold mb-4">Basic Information</h3>
           <div className="space-y-4">
@@ -72,21 +199,22 @@ const BusinessProfile = () => {
               </Label>
               <Input
                 id="businessName"
-                value={profile.businessName}
-                onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
+                value={formData.businessName}
+                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                 className="rounded-2xl"
               />
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-sm font-medium mb-2">
+              <Label htmlFor="businessDescription" className="text-sm font-medium mb-2">
                 Description
               </Label>
               <Textarea
-                id="description"
-                value={profile.description}
-                onChange={(e) => setProfile({ ...profile, description: e.target.value })}
+                id="businessDescription"
+                value={formData.businessDescription}
+                onChange={(e) => setFormData({ ...formData, businessDescription: e.target.value })}
                 className="rounded-2xl min-h-24"
+                placeholder="Describe your laundry services..."
               />
             </div>
           </div>
@@ -103,8 +231,8 @@ const BusinessProfile = () => {
               <Input
                 id="email"
                 type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="rounded-2xl"
               />
             </div>
@@ -117,34 +245,23 @@ const BusinessProfile = () => {
               <Input
                 id="phone"
                 type="tel"
-                value={profile.phone}
-                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="rounded-2xl"
               />
             </div>
 
             <div>
-              <Label htmlFor="address" className="text-sm font-medium mb-2 flex items-center gap-2">
+              <Label htmlFor="businessAddress" className="text-sm font-medium mb-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Address
+                Business Address
               </Label>
-              <Input
-                id="address"
-                value={profile.address}
-                onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+              <Textarea
+                id="businessAddress"
+                value={formData.businessAddress}
+                onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
                 className="rounded-2xl"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="city" className="text-sm font-medium mb-2">
-                City, State ZIP
-              </Label>
-              <Input
-                id="city"
-                value={profile.city}
-                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                className="rounded-2xl"
+                placeholder="Enter your full business address"
               />
             </div>
           </div>
@@ -153,14 +270,14 @@ const BusinessProfile = () => {
         <Card className="rounded-3xl p-6">
           <h3 className="font-bold mb-4">Operating Hours</h3>
           <div>
-            <Label htmlFor="hours" className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Label htmlFor="businessHours" className="text-sm font-medium mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" />
               Business Hours
             </Label>
             <Textarea
-              id="hours"
-              value={profile.hours}
-              onChange={(e) => setProfile({ ...profile, hours: e.target.value })}
+              id="businessHours"
+              value={formData.businessHours}
+              onChange={(e) => setFormData({ ...formData, businessHours: e.target.value })}
               className="rounded-2xl"
               placeholder="e.g., Mon-Fri: 9AM-6PM"
             />

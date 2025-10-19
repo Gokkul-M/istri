@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Camera, User as UserIcon, Mail, Phone, Save, QrCode, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, User as UserIcon, Mail, Phone, Save, QrCode, Loader2, Package, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useStore } from "@/store/useStore";
 import { useProfile } from "@/hooks/useProfile";
+import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { QRCodeSVG } from "qrcode.react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,12 +18,45 @@ const Profile = () => {
   const { currentUser } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { profile, loading, uploading, updateProfile, uploadProfileImage } = useProfile(currentUser?.id || null);
+  const { orders } = useFirebaseOrders();
   
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
   });
+
+  const customerStats = useMemo(() => {
+    const completedOrders = orders.filter(o => o.status === "completed");
+    const totalSpent = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
+    
+    return {
+      totalOrders: orders.length,
+      completedOrders: completedOrders.length,
+      totalSpent,
+    };
+  }, [orders]);
+
+  const formatMemberSince = (createdAt: any): string => {
+    if (!createdAt) return 'Recently';
+    
+    try {
+      let date: Date;
+      if (createdAt instanceof Date) {
+        date = createdAt;
+      } else if (createdAt.toDate && typeof createdAt.toDate === 'function') {
+        date = createdAt.toDate();
+      } else if (typeof createdAt === 'string' || typeof createdAt === 'number') {
+        date = new Date(createdAt);
+      } else {
+        return 'Recently';
+      }
+      
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } catch {
+      return 'Recently';
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -35,7 +69,19 @@ const Profile = () => {
   }, [profile]);
 
   const handleSave = async () => {
-    await updateProfile(formData);
+    try {
+      await updateProfile(formData);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAvatarClick = () => {
@@ -195,6 +241,28 @@ const Profile = () => {
           </Dialog>
         </Card>
 
+        {/* Account Statistics */}
+        <Card className="rounded-[2rem] p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10 shadow-soft hover:shadow-medium transition-all duration-300">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-primary" />
+            Your Statistics
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-background/50 rounded-2xl p-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Total Orders</p>
+              <p className="text-xl font-bold">{customerStats.totalOrders}</p>
+            </div>
+            <div className="bg-background/50 rounded-2xl p-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Completed</p>
+              <p className="text-xl font-bold text-green-600">{customerStats.completedOrders}</p>
+            </div>
+            <div className="bg-background/50 rounded-2xl p-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Total Spent</p>
+              <p className="text-xl font-bold text-primary">${customerStats.totalSpent.toFixed(0)}</p>
+            </div>
+          </div>
+        </Card>
+
         <Card className="rounded-[2rem] p-6 bg-gradient-to-br from-muted/30 to-muted/10 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
@@ -203,7 +271,11 @@ const Profile = () => {
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="font-medium text-foreground">Member since:</span>
-              {profile?.createdAt?.toLocaleDateString() || 'January 2025'}
+              {formatMemberSince(profile?.createdAt)}
+            </p>
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <span className="font-medium text-foreground">Customer ID:</span>
+              {currentUser?.id || profile?.id || 'N/A'}
             </p>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="font-medium text-foreground">Role:</span>
