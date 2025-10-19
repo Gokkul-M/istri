@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -54,10 +54,17 @@ const OrderDetails = () => {
   const { addDispute } = useFirebaseDisputes();
 
   const [showQR, setShowQR] = useState(false);
-  const [rating, setRating] = useState(order?.rating || 0);
+  const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [feedback, setFeedback] = useState(order?.feedback || "");
+  const [feedback, setFeedback] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
+
+  useEffect(() => {
+    if (order) {
+      setRating(order.rating || 0);
+      setFeedback(order.feedback || "");
+    }
+  }, [order]);
 
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [disputeSubject, setDisputeSubject] = useState("");

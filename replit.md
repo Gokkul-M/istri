@@ -10,6 +10,45 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Comprehensive Real-Time Order Details System (October 19, 2025)
+- ✅ **useFirebaseOrder Hook**: Created custom hook for real-time single order fetching
+  - Uses Firestore `onSnapshot` for live order updates
+  - Automatic data synchronization when order changes
+  - Error handling and loading states
+- ✅ **Customer Order Details Page**: Complete rebuild with real Firebase data
+  - Real-time order information with auto-updates
+  - Full status timeline visualization (pending → completed)
+  - QR code display for order verification
+  - Invoice download functionality (PDF generation)
+  - **Inline Rating & Feedback System**:
+    * 5-star rating UI with hover effects
+    * Optional feedback text area
+    * Saves ratings/feedback directly to Firestore (order.rating, order.feedback)
+    * Shows existing ratings for rated orders
+  - **Dispute/Support Dialog**:
+    * Subject, description, and priority fields
+    * Creates disputes in Firestore `disputes` collection
+    * Integrated with useFirebaseDisputes hook
+  - Comprehensive order details (items, pricing, discounts, coupons)
+  - Skeleton loading states and error handling
+- ✅ **Launderer Order Details Page**: New page for launderers to manage orders
+  - Real-time order data synchronization
+  - Customer information display (name, phone, address)
+  - Order status management with dropdown selector
+  - Status progression: pending → confirmed → picked_up → in_progress → ready → out_for_delivery → completed
+  - **Customer Rating Display**: Shows ratings and feedback from customers
+  - **Dispute Display**: Lists all disputes/issues reported for the order with status tracking
+  - QR code access for verification
+  - Order items and pricing breakdown
+- ✅ **Routing Integration**: Added routes for order details pages
+  - Customer: `/customer/order/:orderId`
+  - Launderer: `/launderer/order/:orderId`
+  - Already linked from order history and order management pages
+- ✅ **State Management**: Fixed critical issues with rating persistence
+  - Rating/feedback state syncs from loaded order via useEffect
+  - Prevents data loss when editing existing ratings
+  - Properly displays previously stored ratings and feedback
+
 ### Firebase Integration & UX Improvements (October 18, 2025)
 - ✅ **Special Promotions Real-Time Data**: Customer dashboard now fetches live coupons
   - Replaced hardcoded promotion with Firebase coupons from admin panel

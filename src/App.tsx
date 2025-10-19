@@ -24,6 +24,7 @@ import Settings from "./pages/customer/Settings";
 import RatingFeedback from "./pages/customer/RatingFeedback";
 import Offers from "./pages/customer/Offers";
 import OrderManagement from "./pages/launderer/OrderManagement";
+import LaundererOrderDetails from "./pages/launderer/OrderDetails";
 import LaundererDisputeResolution from "./pages/launderer/DisputeResolution";
 import BusinessProfile from "./pages/launderer/BusinessProfile";
 import LaundererProfile from "./pages/launderer/Profile";
@@ -77,6 +78,7 @@ const App = () => (
           <Route path="/launderer" element={<LaundererDashboard />} />
           <Route path="/launderer/scan" element={<QRScanner />} />
           <Route path="/launderer/orders" element={<OrderManagement />} />
+          <Route path="/launderer/order/:orderId" element={<LaundererOrderDetails />} />
           <Route path="/launderer/disputes" element={<LaundererDisputeResolution />} />
           <Route path="/launderer/profile" element={<LaundererProfile />} />
           <Route path="/launderer/business-profile" element={<BusinessProfile />} />
