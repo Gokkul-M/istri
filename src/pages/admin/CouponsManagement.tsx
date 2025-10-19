@@ -3,20 +3,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Ticket, Trash2, Users, Calendar, Loader2 } from "lucide-react";
+import { Search, Plus, Ticket, Trash2, Users, Calendar, Loader2, Edit2 } from "lucide-react";
 import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
 import { useFirebaseUsers } from "@/hooks/useFirebaseUsers";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CouponsManagement = () => {
   const { coupons, loading: couponsLoading, addCoupon, updateCoupon, deleteCoupon } = useFirebaseCoupons();
   const { users, loading: usersLoading } = useFirebaseUsers();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [editingCoupon, setEditingCoupon] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     discount: 10,
@@ -62,14 +78,64 @@ const CouponsManagement = () => {
     });
   };
 
-  const handleDeleteCoupon = (id: string) => {
-    deleteCoupon(id);
-    toast.success("Coupon deleted");
+  const handleDeleteCoupon = async () => {
+    if (!deleteConfirmId) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteCoupon(deleteConfirmId);
+      toast.success("Coupon deleted successfully");
+      setDeleteConfirmId(null);
+    } catch (error) {
+      toast.error("Failed to delete coupon");
+      console.error("Delete error:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const toggleCouponStatus = (id: string, isActive: boolean) => {
-    updateCoupon(id, { isActive: !isActive });
-    toast.success(`Coupon ${!isActive ? 'activated' : 'deactivated'}`);
+  const toggleCouponStatus = async (id: string, isActive: boolean) => {
+    try {
+      await updateCoupon(id, { isActive: !isActive });
+      toast.success(`Coupon ${!isActive ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      toast.error("Failed to update coupon status");
+      console.error("Toggle status error:", error);
+    }
+  };
+
+  const openEditDialog = (coupon: any) => {
+    setEditingCoupon({
+      id: coupon.id,
+      code: coupon.code,
+      discount: coupon.discount,
+      description: coupon.description,
+      validFrom: coupon.validFrom,
+      validUntil: coupon.validUntil,
+      usageLimit: coupon.usageLimit,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateCoupon = async () => {
+    if (!editingCoupon || !editingCoupon.code || !editingCoupon.description) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const { id, ...updates } = editingCoupon;
+      await updateCoupon(id, updates);
+      toast.success("Coupon updated successfully");
+      setIsEditDialogOpen(false);
+      setEditingCoupon(null);
+    } catch (error) {
+      toast.error("Failed to update coupon");
+      console.error("Update error:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -246,7 +312,14 @@ const CouponsManagement = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDeleteCoupon(coupon.id)}
+                  onClick={() => openEditDialog(coupon)}
+                >
+                  <Edit2 className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeleteConfirmId(coupon.id)}
                 >
                   <Trash2 className="w-3 h-3" />
                 </Button>
@@ -255,6 +328,112 @@ const CouponsManagement = () => {
           </Card>
         ))}
       </div>
+
+      {/* Edit Coupon Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Coupon</DialogTitle>
+            <DialogDescription>Update coupon details</DialogDescription>
+          </DialogHeader>
+          {editingCoupon && (
+            <div className="space-y-4">
+              <div>
+                <Label>Coupon Code</Label>
+                <Input
+                  placeholder="e.g., SAVE20"
+                  value={editingCoupon.code}
+                  onChange={(e) => setEditingCoupon({ ...editingCoupon, code: e.target.value.toUpperCase() })}
+                />
+              </div>
+              <div>
+                <Label>Discount (%)</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={editingCoupon.discount}
+                  onChange={(e) => setEditingCoupon({ ...editingCoupon, discount: parseInt(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Describe the offer..."
+                  value={editingCoupon.description}
+                  onChange={(e) => setEditingCoupon({ ...editingCoupon, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Valid From</Label>
+                  <Input
+                    type="date"
+                    value={editingCoupon.validFrom}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, validFrom: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Valid Until</Label>
+                  <Input
+                    type="date"
+                    value={editingCoupon.validUntil}
+                    onChange={(e) => setEditingCoupon({ ...editingCoupon, validUntil: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Usage Limit</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={editingCoupon.usageLimit}
+                  onChange={(e) => setEditingCoupon({ ...editingCoupon, usageLimit: parseInt(e.target.value) })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditDialogOpen(false)}
+              disabled={isUpdating}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateCoupon}
+              disabled={isUpdating}
+            >
+              {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Update Coupon
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Coupon?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the coupon and remove it from all customer accounts.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteCoupon}
+              disabled={isDeleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
