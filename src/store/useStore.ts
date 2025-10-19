@@ -83,6 +83,22 @@ export interface Message {
   type: 'admin_to_launderer' | 'launderer_to_admin' | 'system';
 }
 
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'success' | 'info' | 'warning' | 'dispute_resolved';
+  read: boolean;
+  createdAt: string;
+  metadata?: {
+    disputeId?: string;
+    orderId?: string;
+    adminNotes?: string;
+    resolution?: string;
+  };
+}
+
 export interface Order {
   id: string;
   customerId: string;

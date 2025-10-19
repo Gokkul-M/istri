@@ -16,7 +16,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
-import type { User, Order, Service, Coupon, Dispute, Message, UserRole, OrderStatus } from '@/store/useStore';
+import type { User, Order, Service, Coupon, Dispute, Message, Notification, UserRole, OrderStatus } from '@/store/useStore';
 
 export interface Address {
   id: string;
@@ -351,6 +351,56 @@ export class FirestoreService {
         ...doc.data(),
       } as Message));
       callback(messages);
+    });
+  }
+
+  // Notifications
+  async createNotification(notification: Omit<Notification, 'id' | 'createdAt'>) {
+    const docRef = await addDoc(collection(db, 'notifications'), {
+      ...notification,
+      createdAt: Timestamp.now(),
+    });
+    return docRef.id;
+  }
+
+  async getNotificationsForUser(userId: string): Promise<Notification[]> {
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Notification));
+  }
+
+  async markNotificationAsRead(notificationId: string) {
+    await updateDoc(doc(db, 'notifications', notificationId), {
+      read: true,
+    });
+  }
+
+  async deleteNotification(notificationId: string) {
+    await deleteDoc(doc(db, 'notifications', notificationId));
+  }
+
+  // Real-time notification listener
+  onNotificationsChange(userId: string, callback: (notifications: Notification[]) => void) {
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    return onSnapshot(q, (snapshot) => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      } as Notification));
+      callback(notifications);
     });
   }
 

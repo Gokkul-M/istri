@@ -13,6 +13,7 @@ import { Search, AlertCircle, CheckCircle, XCircle, MessageSquare, Loader2 } fro
 import { useFirebaseDisputes } from "@/hooks/useFirebaseDisputes";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useFirebaseUsers } from "@/hooks/useFirebaseUsers";
+import { firestoreService } from "@/lib/firebase/firestore";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -56,13 +57,36 @@ const DisputeResolution = () => {
     return filtered;
   };
 
-  const handleUpdateStatus = (disputeId: string, status: 'in_progress' | 'resolved' | 'rejected') => {
+  const handleUpdateStatus = async (disputeId: string, status: 'in_progress' | 'resolved' | 'rejected') => {
+    const dispute = disputes.find(d => d.id === disputeId);
+    
     updateDispute(disputeId, {
       status,
       resolvedAt: status === 'resolved' ? new Date().toISOString() : undefined,
       adminNotes,
       resolution: status === 'resolved' ? resolution : undefined,
     });
+
+    // Create notification for customer if dispute is resolved
+    if (status === 'resolved' && dispute) {
+      try {
+        await firestoreService.createNotification({
+          userId: dispute.customerId,
+          title: 'Dispute Resolved',
+          message: `Your dispute regarding order #${dispute.orderId.slice(-8).toUpperCase()} has been resolved.`,
+          type: 'dispute_resolved',
+          read: false,
+          metadata: {
+            disputeId: dispute.id,
+            orderId: dispute.orderId,
+            adminNotes,
+            resolution,
+          },
+        });
+      } catch (error) {
+        console.error('Error creating notification:', error);
+      }
+    }
 
     setSelectedDispute(null);
     setAdminNotes("");
@@ -156,7 +180,7 @@ const DisputeResolution = () => {
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
-          placeholder="Search disputes by subject, order ID, or description..."
+          placeholder="Search by subject, order ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-12 h-12 rounded-[1.5rem] border-border/50 bg-background/50 backdrop-blur-sm"

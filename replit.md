@@ -6,13 +6,14 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 
 ## Recent Changes
 
-**October 19, 2025 - UI/UX Enhancements Across Customer & Admin Portals**
+**October 19, 2025 - UI/UX Enhancements & Notification System Implementation**
 
 *Customer Portal:*
 - Fixed Order Again card navigation in Customer Dashboard (corrected route from `/customer/orders/:id` to `/customer/order/:id`)
 - Added profile picture upload functionality to Settings page with file validation and toast notifications
 - Enhanced OrderHistory page styling with gradient cards, improved spacing, and better mobile responsiveness
 - Enhanced OrderDetails page styling with consistent card design, better visual hierarchy, and improved mobile padding
+- Implemented real-time notification system displaying dispute resolutions with admin notes and resolution details
 
 *Admin Portal:*
 - Completely redesigned Dispute Resolution page with modern gradient cards and glass-morphism effects
@@ -22,6 +23,13 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 - Added empty states for all tabs with contextual icons and messaging
 - Enhanced dialog modals with better spacing, rounded corners, and improved button layouts
 - Color-coded resolution/notes sections for better visual distinction
+- Automatic notification creation when disputes are resolved, sending admin notes and resolution to customers
+
+*System Architecture:*
+- Created notifications collection in Firestore for persistent notification storage
+- Implemented `useNotifications` hook for real-time notification updates
+- Added notification CRUD operations to FirestoreService
+- Integrated automatic notification trigger on dispute resolution
 
 All changes use real-time Firebase data through custom hooks
 
