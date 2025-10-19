@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,7 +50,7 @@ const NewOrder = () => {
   const { user } = useAuth();
   const { services, loading: servicesLoading } = useFirebaseServices();
   const { createOrder } = useFirebaseOrders();
-  const { addresses, loading: addressesLoading, addAddress } = useAddresses();
+  const { addresses, defaultAddress, loading: addressesLoading, addAddress } = useAddresses();
   const { coupons, incrementCouponUsage } = useFirebaseCoupons();
 
   const [step, setStep] = useState<"services" | "details" | "confirm">(
@@ -83,6 +83,34 @@ const NewOrder = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponValidating, setCouponValidating] = useState(false);
+
+  // Auto-select default address ONLY on initial load
+  useEffect(() => {
+    if (!addressesLoading && addresses.length > 0 && !selectedAddressId && !useNewAddress) {
+      // Initial auto-selection
+      if (defaultAddress) {
+        setSelectedAddressId(defaultAddress.id);
+      } else {
+        setSelectedAddressId(addresses[0].id);
+      }
+    } else if (!addressesLoading && selectedAddressId && !useNewAddress) {
+      // Verify selected address still exists, if not, clear selection
+      const addressExists = addresses.some(addr => addr.id === selectedAddressId);
+      if (!addressExists) {
+        // Selected address was deleted, auto-select default or first
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id);
+        } else if (addresses.length > 0) {
+          setSelectedAddressId(addresses[0].id);
+        } else {
+          setSelectedAddressId("");
+        }
+      }
+      // If address exists, preserve user's manual selection (do nothing)
+    }
+    // Only depend on addresses and loading state, NOT defaultAddress
+    // This prevents re-running when default flag changes remotely
+  }, [addresses, addressesLoading, selectedAddressId, useNewAddress]);
 
   const updateClothCount = (clothId: string, delta: number) => {
     const newCounts = new Map(clothCounts);
