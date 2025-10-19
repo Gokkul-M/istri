@@ -27,10 +27,14 @@ export function useFirebaseCoupons() {
     }
 
     const unsubscribe = onSnapshot(couponsQuery, (snapshot) => {
-      let couponsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Coupon[];
+      let couponsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const { id: _ignoredId, ...restData } = data;
+        return {
+          id: doc.id,
+          ...restData
+        };
+      }) as Coupon[];
 
       // Filter customer coupons
       if (user?.role === 'customer') {
