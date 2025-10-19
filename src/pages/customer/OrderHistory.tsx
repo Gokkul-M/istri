@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, Package, Download } from "lucide-react";
 import { generateInvoicePDF } from "@/components/InvoiceGenerator";
@@ -62,25 +63,25 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">{/* Removed pb for bottom nav */}
+    <div className="min-h-screen bg-background pb-20">{/* Added pb for bottom spacing */}
       {/* Header */}
-      <div className="gradient-primary p-6 pb-10 rounded-b-[3rem] mb-6 shadow-soft">
+      <div className="gradient-primary p-6 pb-12 rounded-b-[3rem] mb-6 shadow-soft">
         <div className="flex items-center justify-between mb-6">
           <Link to="/customer">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 transition-all">
               <ArrowLeft className="w-6 h-6" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold text-white">Order History</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">Order History</h1>
           <div className="w-10" />
         </div>
       </div>
 
-      <div className="px-6">
+      <div className="px-6 pb-6">
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 h-12 rounded-[1.5rem] p-1 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="active" className="rounded-[1.25rem] data-[state=active]:bg-background data-[state=active]:shadow-sm">Active</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-[1.25rem] data-[state=active]:bg-background data-[state=active]:shadow-sm">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-3">
@@ -94,21 +95,25 @@ const OrderHistory = () => {
             ) : activeOrders.length > 0 ? (
               activeOrders.map((order) => (
                 <Link key={order.id} to={`/customer/order/${order.id}`}>
-                  <Card className="rounded-[2rem] p-5 hover-lift cursor-pointer border-border/30 shadow-soft">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">{order.qrCode || order.id}</p>
-                        <h3 className="font-semibold text-lg">{order.items.map(i => i.serviceName).join(', ')}</h3>
-                        <p className="text-sm text-muted-foreground">{order.laundererName || 'Pending assignment'}</p>
+                  <Card className="rounded-[2rem] p-6 hover-lift cursor-pointer border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground mb-1.5 font-medium">Order #{order.qrCode || order.id.slice(-6)}</p>
+                        <h3 className="font-semibold text-lg mb-1">{order.items.map(i => i.serviceName).join(', ')}</h3>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
+                          {order.laundererName || 'Pending assignment'}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-primary text-lg">₹{order.finalAmount || order.totalAmount}</p>
-                        <p className="text-xs text-muted-foreground">{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
+                        <p className="font-bold text-primary text-xl mb-1">₹{order.finalAmount || order.totalAmount}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
                       </div>
                     </div>
+                    <Separator className="my-3" />
                     <div className="flex items-center justify-between">
                       {getStatusBadge(order.status)}
-                      <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
                     </div>
                   </Card>
                 </Link>
@@ -137,18 +142,22 @@ const OrderHistory = () => {
               completedOrders.map((order) => (
                 <div key={order.id} className="relative">
                   <Link to={`/customer/order/${order.id}`}>
-                    <Card className="rounded-[2rem] p-5 hover-lift cursor-pointer border-border/30 shadow-soft">
-                      <div className="flex items-start justify-between mb-3">
+                    <Card className="rounded-[2rem] p-6 hover-lift cursor-pointer border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+                      <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <p className="text-xs text-muted-foreground mb-1">{order.qrCode || order.id}</p>
-                          <h3 className="font-semibold text-lg">{order.items.map(i => i.serviceName).join(', ')}</h3>
-                          <p className="text-sm text-muted-foreground">{order.laundererName || 'Assigned'}</p>
+                          <p className="text-xs text-muted-foreground mb-1.5 font-medium">Order #{order.qrCode || order.id.slice(-6)}</p>
+                          <h3 className="font-semibold text-lg mb-1">{order.items.map(i => i.serviceName).join(', ')}</h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"></span>
+                            {order.laundererName || 'Assigned'}
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-foreground text-lg">₹{order.finalAmount || order.totalAmount}</p>
-                          <p className="text-xs text-muted-foreground">{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
+                          <p className="font-bold text-foreground text-xl mb-1">₹{order.finalAmount || order.totalAmount}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
                         </div>
                       </div>
+                      <Separator className="my-3" />
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {getStatusBadge(order.status)}
@@ -156,7 +165,7 @@ const OrderHistory = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-9 w-9 rounded-xl hover:bg-primary/10"
                               onClick={(e) => handleDownloadInvoice(e, order)}
                               data-testid={`button-download-invoice-${order.id}`}
                             >
@@ -164,7 +173,7 @@ const OrderHistory = () => {
                             </Button>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
+                        <span className="text-xs text-muted-foreground font-medium">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</span>
                       </div>
                     </Card>
                   </Link>

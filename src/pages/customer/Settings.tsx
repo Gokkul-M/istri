@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useStore } from "@/store/useStore";
 import { useSettings } from "@/hooks/useSettings";
+import { useProfile } from "@/hooks/useProfile";
 import { authService } from "@/lib/firebase/auth";
 import { Camera as CapacitorCamera } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
@@ -65,6 +66,8 @@ const Settings = () => {
   const navigate = useNavigate();
   const { currentUser } = useStore();
   const { settings, loading, updateNotificationPreference, updatePermission, changeLanguage } = useSettings(currentUser?.id || null);
+  const { profile, uploading, uploadProfileImage } = useProfile(currentUser?.id || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -226,6 +229,38 @@ const Settings = () => {
     }
   };
 
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File",
+          description: "Please select an image file (JPG, PNG, etc.)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      try {
+        await uploadProfileImage(file, 'avatar');
+        toast({
+          title: "Success",
+          description: "Profile picture updated successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload profile picture. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const SettingItem = ({ 
     icon: Icon, 
     title, 
@@ -337,11 +372,22 @@ const Settings = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            <SettingItem 
-              icon={ImageIcon}
-              title="Profile Picture"
-              subtitle="Update your profile picture"
-              iconColor="text-tertiary"
+            <div onClick={handleProfilePictureClick} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <ImageIcon className="w-5 h-5 text-tertiary" />
+              <div className="flex-1">
+                <p className="font-medium">Profile Picture</p>
+                <p className="text-xs text-muted-foreground">
+                  {uploading ? "Uploading..." : "Update your profile picture"}
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
             />
           </Card>
         </div>

@@ -274,31 +274,31 @@ const OrderDetails = () => {
   const hasRating = order.rating !== undefined && order.rating > 0;
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="gradient-primary p-6 pb-8 rounded-b-[3rem] mb-6 shadow-medium">
-        <div className="flex items-center justify-between mb-4">
+      <div className="gradient-primary p-6 pb-10 rounded-b-[3rem] mb-6 shadow-medium">
+        <div className="flex items-center justify-between mb-6">
           <Link to="/customer/orders">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 transition-all">
               <ArrowLeft className="w-6 h-6" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold text-white">Order Details</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">Order Details</h1>
           <div className="w-10" />
         </div>
 
-        <div className="text-center mt-4">
-          <p className="text-white/80 text-sm mb-2">Order ID</p>
-          <p className="text-white text-2xl font-bold">{order.id}</p>
+        <div className="text-center mt-6">
+          <p className="text-white/80 text-sm mb-2 font-medium">Order ID</p>
+          <p className="text-white text-2xl font-bold tracking-wide">#{order.id.slice(-8).toUpperCase()}</p>
         </div>
       </div>
 
-      <div className="px-6 space-y-4">
+      <div className="px-6 space-y-5 pb-6">
         {/* Status */}
-        <Card className="rounded-[2rem] p-6 shadow-soft border-border/30">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold">Status</h3>
-            <Badge className={`${getStatusBadge(order.status)} text-sm px-4 py-1 border`}>
+        <Card className="rounded-[2rem] p-6 shadow-soft hover:shadow-medium transition-all duration-300 border-border/30 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-lg">Order Status</h3>
+            <Badge className={`${getStatusBadge(order.status)} text-sm px-4 py-1.5 border font-semibold`}>
               {order.status.replace("_", " ").toUpperCase()}
             </Badge>
           </div>
@@ -331,8 +331,8 @@ const OrderDetails = () => {
         </Card>
 
         {/* Service Details */}
-        <Card className="rounded-3xl p-6">
-          <h3 className="font-bold mb-4">Service Details</h3>
+        <Card className="rounded-[2rem] p-6 shadow-soft hover:shadow-medium transition-all duration-300 border-border/30 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+          <h3 className="font-bold text-lg mb-5">Service Details</h3>
           <div className="space-y-3">
             {order.laundererName && (
               <>
@@ -401,10 +401,10 @@ const OrderDetails = () => {
         </Card>
 
         {/* Items */}
-        <Card className="rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-4">
+        <Card className="rounded-[2rem] p-6 shadow-soft hover:shadow-medium transition-all duration-300 border-border/30 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-5">
             <Package className="w-5 h-5 text-primary" />
-            <h3 className="font-bold">Items ({order.items.length})</h3>
+            <h3 className="font-bold text-lg">Items ({order.items.length})</h3>
           </div>
           <div className="space-y-3">
             {order.items.map((item, idx) => (
@@ -442,15 +442,15 @@ const OrderDetails = () => {
         </Card>
 
         {/* QR Code */}
-        <Card className="rounded-3xl p-6 gradient-secondary text-white">
+        <Card className="rounded-[2rem] p-6 gradient-secondary text-white shadow-soft hover:shadow-medium transition-all duration-300">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold mb-1">Order QR Code</h3>
-              <p className="text-white/80 text-sm">Show this to verify your order</p>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-1.5">Order QR Code</h3>
+              <p className="text-white/90 text-sm">Show this to verify your order</p>
             </div>
             <Button
               onClick={() => setShowQR(true)}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 rounded-xl shadow-sm"
               variant="outline"
             >
               <QrCode className="w-5 h-5 mr-2" />
@@ -461,8 +461,8 @@ const OrderDetails = () => {
 
         {/* Rating & Feedback (for completed orders) */}
         {isCompleted && (
-          <Card className="rounded-[2rem] p-6 border-border/30">
-            <h3 className="font-bold mb-4">
+          <Card className="rounded-[2rem] p-6 shadow-soft hover:shadow-medium transition-all duration-300 border-border/30 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+            <h3 className="font-bold text-lg mb-5">
               {hasRating ? "Your Rating" : "Rate Your Experience"}
             </h3>
 
@@ -533,15 +533,15 @@ const OrderDetails = () => {
         )}
 
         {/* Actions */}
-        <div className="space-y-3">
+        <div className="space-y-3 pt-2">
           {isCompleted && (
             <Button
               onClick={handleDownloadInvoice}
               variant="hero"
-              className="w-full"
+              className="w-full h-12 rounded-[1.5rem] shadow-md hover:shadow-lg transition-all"
               data-testid="button-download-invoice"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="w-5 h-5 mr-2" />
               Download Invoice
             </Button>
           )}
@@ -549,8 +549,8 @@ const OrderDetails = () => {
           {/* Support/Dispute Dialog */}
           <Dialog open={disputeOpen} onOpenChange={setDisputeOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="w-full">
-                <MessageSquare className="w-4 h-4 mr-2" />
+              <Button variant="outline" className="w-full h-12 rounded-[1.5rem] border-border/50 hover:bg-muted/50">
+                <MessageSquare className="w-5 h-5 mr-2" />
                 Report an Issue
               </Button>
             </DialogTrigger>

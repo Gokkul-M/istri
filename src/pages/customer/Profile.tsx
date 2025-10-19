@@ -26,16 +26,6 @@ const Profile = () => {
     phone: "",
   });
 
-  const customerStats = useMemo(() => {
-    const completedOrders = orders.filter(o => o.status === "completed");
-    const totalSpent = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
-    
-    return {
-      totalOrders: orders.length,
-      completedOrders: completedOrders.length,
-      totalSpent,
-    };
-  }, [orders]);
 
   const formatMemberSince = (createdAt: any): string => {
     if (!createdAt) return 'Recently';
@@ -239,28 +229,6 @@ const Profile = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </Card>
-
-        {/* Account Statistics */}
-        <Card className="rounded-[2rem] p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10 shadow-soft hover:shadow-medium transition-all duration-300">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Package className="w-5 h-5 text-primary" />
-            Your Statistics
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-background/50 rounded-2xl p-3 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Total Orders</p>
-              <p className="text-xl font-bold">{customerStats.totalOrders}</p>
-            </div>
-            <div className="bg-background/50 rounded-2xl p-3 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Completed</p>
-              <p className="text-xl font-bold text-green-600">{customerStats.completedOrders}</p>
-            </div>
-            <div className="bg-background/50 rounded-2xl p-3 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Total Spent</p>
-              <p className="text-xl font-bold text-primary">${customerStats.totalSpent.toFixed(0)}</p>
-            </div>
-          </div>
         </Card>
 
         <Card className="rounded-[2rem] p-6 bg-gradient-to-br from-muted/30 to-muted/10 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300">

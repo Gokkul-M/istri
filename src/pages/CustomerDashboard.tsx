@@ -259,7 +259,7 @@ const CustomerDashboard = () => {
               const statusText = order.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
               
               return (
-                <Link key={order.id} to={`/customer/orders/${order.id}`} data-testid={`card-order-again-${order.id}`} className="block mb-3">
+                <Link key={order.id} to={`/customer/order/${order.id}`} data-testid={`card-order-again-${order.id}`} className="block mb-3">
                   <Card className="rounded-[2rem] p-5 hover-lift cursor-pointer border-border/30 shadow-soft">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center">
