@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Launderer Dashboard Real Data Integration (October 19, 2025)
+- ✅ **Removed Dummy Data from Sidebar**:
+  - Business name now displays real data from user profile (`businessName` or `name` field)
+  - "This Week" stat shows actual order count from last 7 days
+  - Rating displays calculated average from completed orders with customer ratings
+  - Fallback text for missing data: "My Business", "No ratings"
+- ✅ **Performance Optimizations**:
+  - Used `useMemo` hooks for weekly order calculation
+  - Used `useMemo` for average rating calculation
+  - Real-time updates via `useProfile` and `useFirebaseOrders` hooks
+- ✅ **Error Handling**:
+  - Safe date parsing with try-catch for order creation dates
+  - Graceful handling of missing ratings
+  - Resilient to invalid or missing profile data
+
 ### Admin Coupon Management Enhancements (October 19, 2025)
 - ✅ **Edit Coupon Functionality**:
   - Full edit dialog with all coupon fields (code, discount, description, valid dates, usage limit)
