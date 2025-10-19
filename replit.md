@@ -29,6 +29,12 @@ Preferred communication style: Simple, everyday language.
   - All create, update, delete, and toggle operations use Firebase methods
   - Changes reflect instantly via onSnapshot listeners
   - No manual page refresh required
+- ✅ **Critical Bug Fix - Coupon ID Mapping**:
+  - Fixed issue where custom ID fields were overwriting Firebase document IDs
+  - Now correctly extracts and ignores legacy `id` fields from document data
+  - All update/delete/toggle operations now use correct Firestore document IDs
+  - Eliminated "No document to update" errors for existing coupons
+  - New coupons created without custom ID field pollution
 
 ### Real-Time Updates & Error Handling (October 19, 2025)
 - ✅ **Address Auto-Selection in NewOrder**:
