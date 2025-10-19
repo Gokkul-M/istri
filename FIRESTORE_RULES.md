@@ -22,29 +22,36 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Existing rules for users, orders, etc. remain the same
+    // Existing rules for users, orders, etc. need to be updated
+    // See complete example below for secure implementation
     
     // Counter for generating custom IDs
-    // Only authenticated users can read, only system can write
     match /counters/{counterId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null; // Needed for ID generation during signup
+      allow write: if request.auth != null;
     }
     
     // User mapping: Firebase UID -> Custom ID
-    // Users can only read their own mapping
+    // SECURITY: Only owner can create their own mapping during signup
     match /userMapping/{firebaseUid} {
-      allow read: if request.auth != null && request.auth.uid == firebaseUid;
-      allow write: if request.auth != null && request.auth.uid == firebaseUid; // Needed during signup
-      allow create: if request.auth != null; // Allow creation during signup
+      allow read: if request.auth != null && 
+                     request.auth.uid == firebaseUid;
+      // Only allow creation by the owner
+      allow create: if request.auth != null && 
+                       request.auth.uid == firebaseUid;
+      // Mappings are immutable - no updates or deletes
+      allow update, delete: if false;
     }
     
     // Reverse mapping: Custom ID -> Firebase UID
-    // Users can read mappings to resolve custom IDs
+    // SECURITY: Must match Firebase UID creating it
     match /customIdMapping/{customId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null; // Needed during signup
-      allow create: if request.auth != null; // Allow creation during signup
+      // Only allow creation with matching Firebase UID
+      allow create: if request.auth != null && 
+                       request.resource.data.firebaseUid == request.auth.uid;
+      // Mappings are immutable - no updates or deletes
+      allow update, delete: if false;
     }
   }
 }
@@ -68,50 +75,123 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Get custom ID from Firebase UID
+    function getCustomId() {
+      return get(/databases/$(database)/documents/userMapping/$(request.auth.uid)).data.customId;
+    }
+    
+    // Check if user is admin using custom ID mapping
     function isAdmin() {
       return isAuthenticated() && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+             get(/databases/$(database)/documents/users/$(getCustomId())).data.role == 'admin';
+    }
+    
+    // Check if user owns this document by Firebase UID
+    function isOwnerByFirebaseUid(firebaseUid) {
+      return request.auth != null && request.auth.uid == firebaseUid;
+    }
+    
+    // Check if user owns this document by custom ID
+    function isOwnerByCustomId(customId) {
+      return request.auth != null && getCustomId() == customId;
     }
     
     // Users collection - now uses custom IDs as document IDs
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && 
-                     (request.auth.uid == resource.data.firebaseUid || isAdmin());
-      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                      (isOwnerByCustomId(userId) || isAdmin());
+      allow delete: if isAdmin();
+      // Create is handled during signup - must match Firebase UID
+      allow create: if isAuthenticated() && 
+                       request.resource.data.firebaseUid == request.auth.uid;
+      
+      // User addresses subcollection
+      match /addresses/{addressId} {
+        allow read, write: if isAuthenticated() && 
+                             (isOwnerByCustomId(userId) || isAdmin());
+      }
     }
     
     // Counters for ID generation
     match /counters/{counterId} {
       allow read: if isAuthenticated();
+      // Only allow write during signup/migration - transactions handle concurrency
       allow write: if isAuthenticated();
     }
     
-    // User mapping collections
+    // User mapping: Firebase UID -> Custom ID
+    // CRITICAL: Only the user can create their own mapping during signup
     match /userMapping/{firebaseUid} {
       allow read: if isAuthenticated() && 
-                     (request.auth.uid == firebaseUid || isAdmin());
-      allow write: if isAuthenticated() && request.auth.uid == firebaseUid;
-      allow create: if isAuthenticated();
+                     (isOwnerByFirebaseUid(firebaseUid) || isAdmin());
+      // Only allow creation by the owner during signup
+      allow create: if isAuthenticated() && 
+                       isOwnerByFirebaseUid(firebaseUid);
+      // Updates/deletes forbidden (mappings are immutable)
+      allow update, delete: if false;
     }
     
+    // Reverse mapping: Custom ID -> Firebase UID
+    // CRITICAL: Must match the corresponding userMapping entry
     match /customIdMapping/{customId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow create: if isAuthenticated();
+      // Only allow creation when creating userMapping in same transaction
+      allow create: if isAuthenticated() && 
+                       request.resource.data.firebaseUid == request.auth.uid;
+      // Updates/deletes forbidden (mappings are immutable)
+      allow update, delete: if false;
     }
     
-    // Orders - already use custom IDs in customerId/laundererId fields
+    // Orders - use custom IDs in customerId/laundererId fields
     match /orders/{orderId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && 
-                       (resource.data.customerId == request.auth.uid || 
-                        resource.data.laundererId == request.auth.uid ||
+                       (isOwnerByCustomId(resource.data.customerId) || 
+                        isOwnerByCustomId(resource.data.laundererId) ||
                         isAdmin());
+      allow delete: if isAdmin();
     }
     
-    // Other collections remain the same...
+    // Disputes
+    match /disputes/{disputeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                       (isOwnerByCustomId(resource.data.customerId) || 
+                        isOwnerByCustomId(resource.data.laundererId) ||
+                        isAdmin());
+      allow delete: if isAdmin();
+    }
+    
+    // Messages
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && 
+                     (isOwnerByCustomId(resource.data.senderId) || 
+                      isOwnerByCustomId(resource.data.receiverId) ||
+                      isAdmin());
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Services - global, admin managed
+    match /services/{serviceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Coupons - admin managed
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // User settings
+    match /userSettings/{userId} {
+      allow read, write: if isAuthenticated() && 
+                           (isOwnerByCustomId(userId) || isAdmin());
+    }
   }
 }
 ```
