@@ -72,9 +72,18 @@ const CustomerSetup = () => {
       navigate("/customer");
     } catch (error: any) {
       console.error("Profile creation error:", error);
+      
+      let errorMessage = "Please try again";
+      
+      if (error.code === "permission-denied") {
+        errorMessage = "System setup required. Please contact administrator to update Firebase security rules.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Profile Creation Failed",
-        description: error.message || "Please try again",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

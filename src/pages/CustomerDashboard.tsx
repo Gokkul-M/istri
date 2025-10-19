@@ -289,34 +289,6 @@ const CustomerDashboard = () => {
           )}
         </div>
 
-        {/* Scheduled Pickups */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold tracking-tight">Scheduled Pickups</h2>
-            <Link to="/customer/new-order">
-              <Button variant="ghost" size="sm" className="text-primary" data-testid="button-view-more-scheduled-pickup">
-                View More <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-          <div className="space-y-3">
-            <Link to="/customer/new-order" data-testid="card-scheduled-pickup-1">
-              <Card className="rounded-[2rem] p-5 hover-lift cursor-pointer gradient-accent border-0 shadow-medium">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Calendar className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white mb-1">Tomorrow, 10:00 AM</h3>
-                    <p className="text-white/80 text-sm">Pickup at Home</p>
-                    <p className="text-white/70 text-xs mt-1">Wash & Fold • 5 items</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
         {/* Quick Stats */}
         <div>
           <h2 className="text-xl font-bold mb-4 tracking-tight">Your Activity</h2>
@@ -325,16 +297,22 @@ const CustomerDashboard = () => {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                 <Receipt className="w-6 h-6 text-primary" />
               </div>
-              <p className="text-2xl font-bold tracking-tight">₹24,500</p>
+              {ordersLoading ? (
+                <Skeleton className="h-8 w-20 mb-1" />
+              ) : (
+                <p className="text-2xl font-bold tracking-tight">₹{totalSpent}</p>
+              )}
               <p className="text-sm text-muted-foreground mt-1">Total Spent</p>
             </Card>
-            <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
-                <Bell className="w-6 h-6 text-accent" />
-              </div>
-              <p className="text-2xl font-bold tracking-tight">3</p>
-              <p className="text-sm text-muted-foreground mt-1">Notifications</p>
-            </Card>
+            <Link to="/customer/notifications">
+              <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer hover-lift">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
+                  <Bell className="w-6 h-6 text-accent" />
+                </div>
+                <p className="text-2xl font-bold tracking-tight">0</p>
+                <p className="text-sm text-muted-foreground mt-1">Notifications</p>
+              </Card>
+            </Link>
           </div>
         </div>
       </div>
