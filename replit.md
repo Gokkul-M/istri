@@ -10,6 +10,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Customer Functionality Fixes (October 19, 2025)
+- ✅ **Fixed Address Management**:
+  - Updated `useAddresses` hook to use custom IDs instead of Firebase UIDs
+  - Added error callbacks to real-time address listeners
+  - Improved error handling with detailed console logging
+- ✅ **Optimized Real-Time Data Fetching**:
+  - Enhanced `useFirebaseOrders` with retry logic (1 retry per error)
+  - Automatic retry reset on successful data fetch
+  - Ref-based retry tracking to prevent infinite loops
+- ✅ **Fixed Permission Toggles** (`Settings.tsx`):
+  - Proper OS-level permission requests via Capacitor
+  - Handles all permission states: 'granted', 'prompt', 'denied'
+  - Only persists after receiving 'granted' status
+  - Added loading states to all toggle switches
+- ✅ **Fixed Notification Preferences**:
+  - Persistent notification settings with error handling
+  - Loading states for all notification toggles
+- ✅ **Index Missing Error Handling**:
+  - Created `IndexMissingError` component with Firebase Console link
+  - Integrated in CustomerDashboard and OrderHistory pages
+  - Clear user guidance when composite indexes are missing
+
 ### Custom User ID System Implementation (October 19, 2025)
 - ✅ **ID Generation Service** (`src/lib/firebase/idGenerator.ts`):
   - Auto-incrementing counter system for generating unique IDs
