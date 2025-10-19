@@ -19,10 +19,12 @@ import {
   Home,
   Briefcase,
   Building,
+  Tag,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
-import { OrderItem } from "@/store/useStore";
+import { OrderItem, Coupon } from "@/store/useStore";
 import { QRCodeModal } from "@/components/QRCodeModal";
 import { Badge } from "@/components/ui/badge";
 import { firestoreService } from "@/lib/firebase";
@@ -31,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFirebaseServices } from "@/hooks/useFirebaseServices";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
+import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
 
 // Cloth items for counting
 const clothItems = [
@@ -48,6 +51,7 @@ const NewOrder = () => {
   const { services, loading: servicesLoading } = useFirebaseServices();
   const { createOrder } = useFirebaseOrders();
   const { addresses, loading: addressesLoading, addAddress } = useAddresses();
+  const { coupons, incrementCouponUsage } = useFirebaseCoupons();
 
   const [step, setStep] = useState<"services" | "details" | "confirm">(
     "services",
@@ -74,6 +78,11 @@ const NewOrder = () => {
   const [notes, setNotes] = useState("");
   const [showQR, setShowQR] = useState(false);
   const [generatedOrder, setGeneratedOrder] = useState<string>("");
+  
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponValidating, setCouponValidating] = useState(false);
 
   const updateClothCount = (clothId: string, delta: number) => {
     const newCounts = new Map(clothCounts);
@@ -119,6 +128,119 @@ const NewOrder = () => {
     });
     
     return total;
+  };
+
+  const calculateDiscount = () => {
+    if (!appliedCoupon) return 0;
+    const total = calculateTotal();
+    return Math.round((total * appliedCoupon.discount) / 100);
+  };
+
+  const calculateFinalTotal = () => {
+    return calculateTotal() - calculateDiscount();
+  };
+
+  const validateAndApplyCoupon = () => {
+    if (!couponCode.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a coupon code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCouponValidating(true);
+    
+    // Find the coupon
+    const coupon = coupons.find(c => c.code.toUpperCase() === couponCode.toUpperCase());
+    
+    if (!coupon) {
+      setCouponValidating(false);
+      toast({
+        title: "Invalid Coupon",
+        description: "This coupon code is not valid",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if coupon is active
+    if (!coupon.isActive) {
+      setCouponValidating(false);
+      toast({
+        title: "Coupon Inactive",
+        description: "This coupon is not currently active",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check validity dates
+    const now = new Date();
+    const validFrom = new Date(coupon.validFrom);
+    const validUntil = new Date(coupon.validUntil);
+
+    if (now < validFrom) {
+      setCouponValidating(false);
+      toast({
+        title: "Coupon Not Yet Valid",
+        description: `This coupon will be valid from ${validFrom.toLocaleDateString()}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (now > validUntil) {
+      setCouponValidating(false);
+      toast({
+        title: "Coupon Expired",
+        description: `This coupon expired on ${validUntil.toLocaleDateString()}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check usage limit
+    if (coupon.usedCount >= coupon.usageLimit) {
+      setCouponValidating(false);
+      toast({
+        title: "Coupon Limit Reached",
+        description: "This coupon has reached its usage limit",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if coupon is assigned to specific customers
+    if (coupon.assignedTo && coupon.assignedTo.length > 0) {
+      if (!user || !coupon.assignedTo.includes(user.id)) {
+        setCouponValidating(false);
+        toast({
+          title: "Coupon Not Available",
+          description: "This coupon is not available for your account",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Coupon is valid, apply it
+    setAppliedCoupon(coupon);
+    setCouponValidating(false);
+    toast({
+      title: "Coupon Applied!",
+      description: `You saved ₹${Math.round((calculateTotal() * coupon.discount) / 100)} with code ${coupon.code}`,
+    });
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast({
+      title: "Coupon Removed",
+      description: "The coupon has been removed from your order",
+    });
   };
 
   const getIconForLabel = (label: string) => {
@@ -209,6 +331,9 @@ const NewOrder = () => {
         customerAddress,
         items: orderItems,
         totalAmount: calculateTotal(),
+        discount: appliedCoupon ? calculateDiscount() : 0,
+        couponCode: appliedCoupon?.code,
+        finalAmount: calculateFinalTotal(),
         status: "pending" as const,
         pickupTime,
         deliveryTime,
@@ -223,6 +348,16 @@ const NewOrder = () => {
       
       // Update order with QR code
       await firestoreService.updateOrder(orderId, { qrCode });
+
+      // Increment coupon usage if a coupon was applied
+      if (appliedCoupon) {
+        try {
+          await incrementCouponUsage(appliedCoupon.id);
+        } catch (error) {
+          console.error('Error incrementing coupon usage:', error);
+          // Don't fail the order if coupon increment fails
+        }
+      }
 
       setGeneratedOrder(orderId);
       setShowQR(true);
@@ -909,21 +1044,100 @@ const NewOrder = () => {
                 </div>
               </Card>
 
+              {/* Coupon Code Section */}
+              <Card className="rounded-3xl p-6 card-glass space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-primary" />
+                  Apply Coupon Code
+                </h3>
+                {!appliedCoupon ? (
+                  <div className="flex gap-3">
+                    <Input
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="rounded-2xl flex-1 uppercase"
+                      disabled={couponValidating}
+                    />
+                    <Button
+                      onClick={validateAndApplyCoupon}
+                      disabled={couponValidating || !couponCode.trim()}
+                      className="rounded-2xl"
+                      variant="default"
+                    >
+                      {couponValidating ? "Validating..." : "Apply"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-4 bg-primary/10 rounded-2xl border-2 border-primary">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="rounded-lg">
+                          {appliedCoupon.code}
+                        </Badge>
+                        <span className="text-sm text-primary font-semibold">
+                          {appliedCoupon.discount}% OFF
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {appliedCoupon.description}
+                      </p>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={removeCoupon}
+                      className="rounded-full h-8 w-8"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </Card>
+
               {/* Total */}
               <Card className="rounded-3xl p-6 gradient-primary text-white shadow-glow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white/80 text-sm font-medium">
-                      Total Amount
-                    </p>
-                    <p className="text-4xl font-bold mt-1">
-                      ₹{calculateTotal()}
-                    </p>
+                {appliedCoupon ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-white/70 text-sm">
+                      <span>Subtotal</span>
+                      <span>₹{calculateTotal()}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-green-300 text-sm font-semibold">
+                      <span>Discount ({appliedCoupon.discount}%)</span>
+                      <span>- ₹{calculateDiscount()}</span>
+                    </div>
+                    <div className="border-t border-white/20 pt-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white/80 text-sm font-medium">
+                            Final Amount
+                          </p>
+                          <p className="text-4xl font-bold mt-1">
+                            ₹{calculateFinalTotal()}
+                          </p>
+                        </div>
+                        <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                          <ShoppingBag className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
-                    <ShoppingBag className="w-8 h-8 text-white" />
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Total Amount
+                      </p>
+                      <p className="text-4xl font-bold mt-1">
+                        ₹{calculateTotal()}
+                      </p>
+                    </div>
+                    <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                      <ShoppingBag className="w-8 h-8 text-white" />
+                    </div>
                   </div>
-                </div>
+                )}
               </Card>
 
               <Button

@@ -77,12 +77,23 @@ export function useFirebaseCoupons() {
     }
   };
 
+  const incrementCouponUsage = async (couponId: string) => {
+    const couponRef = doc(db, 'coupons', couponId);
+    const coupon = coupons.find(c => c.id === couponId);
+    if (!coupon) return;
+
+    await updateDoc(couponRef, {
+      usedCount: (coupon.usedCount || 0) + 1
+    });
+  };
+
   return {
     coupons,
     loading,
     addCoupon,
     updateCoupon,
     deleteCoupon,
-    assignCouponToCustomer
+    assignCouponToCustomer,
+    incrementCouponUsage
   };
 }

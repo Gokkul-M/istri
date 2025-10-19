@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { firestoreService, Address } from '@/lib/firebase/firestore';
 import { useFirebaseAuth } from './useFirebaseAuth';
 
@@ -29,6 +29,11 @@ export function useAddresses() {
       unsubscribe();
     };
   }, [firebaseUser?.uid]);
+
+  // Memoize default address for better performance
+  const defaultAddress = useMemo(() => {
+    return addresses.find(addr => addr.isDefault);
+  }, [addresses]);
 
   const addAddress = async (address: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!firebaseUser?.uid) throw new Error('User not authenticated');
@@ -77,6 +82,7 @@ export function useAddresses() {
 
   return {
     addresses,
+    defaultAddress,
     loading,
     error,
     addAddress,

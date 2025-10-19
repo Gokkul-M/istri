@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Order, OrderStatus } from '@/store/useStore';
 import { useAuth } from './useFirebaseAuth';
 
-export function useFirebaseOrders() {
+export function useFirebaseOrders(limitCount: number = 50) {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,24 +19,27 @@ export function useFirebaseOrders() {
     let ordersQuery;
     
     if (user.role === 'admin') {
-      // Admin sees all orders
+      // Admin sees all orders, limited to recent ones for performance
       ordersQuery = query(
         collection(db, 'orders'),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
       );
     } else if (user.role === 'customer') {
-      // Customer sees their own orders
+      // Customer sees their own orders, limited to recent ones
       ordersQuery = query(
         collection(db, 'orders'),
         where('customerId', '==', user.id),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
       );
     } else if (user.role === 'launderer') {
-      // Launderer sees assigned orders
+      // Launderer sees assigned orders, limited to recent ones
       ordersQuery = query(
         collection(db, 'orders'),
         where('laundererId', '==', user.id),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
       );
     }
 
@@ -52,10 +55,13 @@ export function useFirebaseOrders() {
       })) as Order[];
       setOrders(ordersData);
       setLoading(false);
+    }, (error) => {
+      console.error('Error fetching orders:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, limitCount]);
 
   const createOrder = async (orderData: Omit<Order, 'id'>) => {
     const docRef = await addDoc(collection(db, 'orders'), orderData);
