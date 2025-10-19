@@ -23,6 +23,7 @@ import PaymentManagement from "./pages/customer/PaymentManagement";
 import Settings from "./pages/customer/Settings";
 import RatingFeedback from "./pages/customer/RatingFeedback";
 import Offers from "./pages/customer/Offers";
+import Notifications from "./pages/customer/Notifications";
 import OrderManagement from "./pages/launderer/OrderManagement";
 import LaundererOrderDetails from "./pages/launderer/OrderDetails";
 import LaundererDisputeResolution from "./pages/launderer/DisputeResolution";
@@ -76,6 +77,7 @@ const App = () => (
           <Route path="/customer/settings" element={<Settings />} />
           <Route path="/customer/rate/:orderId" element={<RatingFeedback />} />
           <Route path="/customer/offers" element={<Offers />} />
+          <Route path="/customer/notifications" element={<Notifications />} />
           <Route path="/launderer" element={<LaundererDashboard />} />
           <Route path="/launderer/scan" element={<QRScanner />} />
           <Route path="/launderer/orders" element={<OrderManagement />} />
