@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { useStore } from "@/store/useStore";
 import { useSettings } from "@/hooks/useSettings";
 import { authService } from "@/lib/firebase/auth";
+import { Camera as CapacitorCamera } from '@capacitor/camera';
+import { Geolocation } from '@capacitor/geolocation';
 import {
   User,
   Lock,
@@ -68,14 +70,88 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const emailNotifications = settings?.notifications.email || true;
-  const smsNotifications = settings?.notifications.sms || false;
-  const whatsappNotifications = settings?.notifications.whatsapp || true;
-  const pushNotifications = settings?.notifications.push || true;
+  const [toggleLoading, setToggleLoading] = useState<string | null>(null);
+
+  const emailNotifications = settings?.notifications.email ?? true;
+  const smsNotifications = settings?.notifications.sms ?? false;
+  const whatsappNotifications = settings?.notifications.whatsapp ?? true;
+  const pushNotifications = settings?.notifications.push ?? true;
   const selectedLanguage = settings?.language || "en";
-  const locationPermission = settings?.permissions.location || true;
-  const cameraPermission = settings?.permissions.camera || true;
-  const galleryPermission = settings?.permissions.gallery || true;
+  const locationPermission = settings?.permissions.location ?? true;
+  const cameraPermission = settings?.permissions.camera ?? true;
+  const galleryPermission = settings?.permissions.gallery ?? true;
+
+  const handlePermissionToggle = async (type: 'location' | 'camera' | 'gallery', value: boolean) => {
+    if (!value) {
+      // Just save to settings if turning off
+      await updatePermission(type, false);
+      return;
+    }
+
+    setToggleLoading(type);
+    try {
+      if (type === 'location') {
+        const permission = await Geolocation.checkPermissions();
+        if (permission.location === 'denied') {
+          const request = await Geolocation.requestPermissions();
+          if (request.location === 'granted' || request.location === 'prompt') {
+            await updatePermission(type, true);
+          } else {
+            toast({
+              title: "Permission Denied",
+              description: "Please enable location access in your device settings.",
+              variant: "destructive",
+            });
+            return;
+          }
+        } else {
+          await updatePermission(type, true);
+        }
+      } else if (type === 'camera' || type === 'gallery') {
+        const permission = await CapacitorCamera.checkPermissions();
+        if (permission.camera === 'denied' || permission.photos === 'denied') {
+          const request = await CapacitorCamera.requestPermissions();
+          if (request.camera === 'granted' || request.photos === 'granted') {
+            await updatePermission(type, true);
+          } else {
+            toast({
+              title: "Permission Denied",
+              description: `Please enable ${type} access in your device settings.`,
+              variant: "destructive",
+            });
+            return;
+          }
+        } else {
+          await updatePermission(type, true);
+        }
+      }
+    } catch (error) {
+      console.error('Permission request error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to request permission. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setToggleLoading(null);
+    }
+  };
+
+  const handleNotificationToggle = async (type: 'push' | 'email' | 'sms' | 'whatsapp', value: boolean) => {
+    setToggleLoading(type);
+    try {
+      await updateNotificationPreference(type, value);
+    } catch (error) {
+      console.error('Notification toggle error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notification preferences.",
+        variant: "destructive",
+      });
+    } finally {
+      setToggleLoading(null);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -330,7 +406,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">In-app alerts</p>
                       </div>
                     </div>
-                    <Switch checked={pushNotifications} onCheckedChange={(v) => updateNotificationPreference('push', v)} data-testid="switch-push" />
+                    <Switch checked={pushNotifications} onCheckedChange={(v) => handleNotificationToggle('push', v)} disabled={toggleLoading === 'push'} data-testid="switch-push" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -340,7 +416,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">Order updates via email</p>
                       </div>
                     </div>
-                    <Switch checked={emailNotifications} onCheckedChange={(v) => updateNotificationPreference('email', v)} data-testid="switch-email" />
+                    <Switch checked={emailNotifications} onCheckedChange={(v) => handleNotificationToggle('email', v)} disabled={toggleLoading === 'email'} data-testid="switch-email" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -350,7 +426,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">Text message alerts</p>
                       </div>
                     </div>
-                    <Switch checked={smsNotifications} onCheckedChange={(v) => updateNotificationPreference('sms', v)} data-testid="switch-sms" />
+                    <Switch checked={smsNotifications} onCheckedChange={(v) => handleNotificationToggle('sms', v)} disabled={toggleLoading === 'sms'} data-testid="switch-sms" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -360,7 +436,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">Updates on WhatsApp</p>
                       </div>
                     </div>
-                    <Switch checked={whatsappNotifications} onCheckedChange={(v) => updateNotificationPreference('whatsapp', v)} data-testid="switch-whatsapp" />
+                    <Switch checked={whatsappNotifications} onCheckedChange={(v) => handleNotificationToggle('whatsapp', v)} disabled={toggleLoading === 'whatsapp'} data-testid="switch-whatsapp" />
                   </div>
                 </div>
               </DialogContent>
@@ -432,7 +508,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">For delivery tracking</p>
                       </div>
                     </div>
-                    <Switch checked={locationPermission} onCheckedChange={(v) => updatePermission('location', v)} data-testid="switch-location" />
+                    <Switch checked={locationPermission} onCheckedChange={(v) => handlePermissionToggle('location', v)} disabled={toggleLoading === 'location'} data-testid="switch-location" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -442,7 +518,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">Take photos of items</p>
                       </div>
                     </div>
-                    <Switch checked={cameraPermission} onCheckedChange={(v) => updatePermission('camera', v)} data-testid="switch-camera" />
+                    <Switch checked={cameraPermission} onCheckedChange={(v) => handlePermissionToggle('camera', v)} disabled={toggleLoading === 'camera'} data-testid="switch-camera" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -452,7 +528,7 @@ const Settings = () => {
                         <p className="text-xs text-muted-foreground">Upload photos</p>
                       </div>
                     </div>
-                    <Switch checked={galleryPermission} onCheckedChange={(v) => updatePermission('gallery', v)} data-testid="switch-gallery" />
+                    <Switch checked={galleryPermission} onCheckedChange={(v) => handlePermissionToggle('gallery', v)} disabled={toggleLoading === 'gallery'} data-testid="switch-gallery" />
                   </div>
                 </div>
               </DialogContent>

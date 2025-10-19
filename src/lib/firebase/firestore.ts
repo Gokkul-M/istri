@@ -442,19 +442,27 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  onAddressesChange(userId: string, callback: (addresses: Address[]) => void) {
+  onAddressesChange(userId: string, callback: (addresses: Address[]) => void, onError?: (error: Error) => void) {
     const q = query(
       collection(db, 'users', userId, 'addresses'),
       orderBy('isDefault', 'desc'),
       orderBy('createdAt', 'desc')
     );
-    return onSnapshot(q, (snapshot) => {
-      const addresses = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Address));
-      callback(addresses);
-    });
+    return onSnapshot(q, 
+      (snapshot) => {
+        const addresses = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        } as Address));
+        callback(addresses);
+      },
+      (error) => {
+        console.error('Address listener error:', error);
+        if (onError) {
+          onError(error as Error);
+        }
+      }
+    );
   }
 
   // Batch operations for seeding data

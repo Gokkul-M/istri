@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { firestoreService, Address } from '@/lib/firebase/firestore';
-import { useFirebaseAuth } from './useFirebaseAuth';
+import { useAuth } from './useFirebaseAuth';
 
 export function useAddresses() {
-  const { firebaseUser } = useFirebaseAuth();
+  const { user } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!firebaseUser?.uid) {
+    if (!user?.id) {
       setAddresses([]);
       setLoading(false);
       return;
@@ -17,18 +17,23 @@ export function useAddresses() {
 
     setLoading(true);
     const unsubscribe = firestoreService.onAddressesChange(
-      firebaseUser.uid,
+      user.id,
       (updatedAddresses) => {
         setAddresses(updatedAddresses);
         setLoading(false);
         setError(null);
+      },
+      (err) => {
+        console.error('Address fetch error:', err);
+        setError(err as Error);
+        setLoading(false);
       }
     );
 
     return () => {
       unsubscribe();
     };
-  }, [firebaseUser?.uid]);
+  }, [user?.id]);
 
   // Memoize default address for better performance
   const defaultAddress = useMemo(() => {
@@ -36,45 +41,49 @@ export function useAddresses() {
   }, [addresses]);
 
   const addAddress = async (address: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
-    if (!firebaseUser?.uid) throw new Error('User not authenticated');
+    if (!user?.id) throw new Error('User not authenticated');
     
     try {
-      const addressId = await firestoreService.addAddress(firebaseUser.uid, address);
+      const addressId = await firestoreService.addAddress(user.id, address);
       return addressId;
     } catch (err) {
+      console.error('Error adding address:', err);
       setError(err as Error);
       throw err;
     }
   };
 
   const updateAddress = async (addressId: string, updates: Partial<Address>) => {
-    if (!firebaseUser?.uid) throw new Error('User not authenticated');
+    if (!user?.id) throw new Error('User not authenticated');
     
     try {
-      await firestoreService.updateAddress(firebaseUser.uid, addressId, updates);
+      await firestoreService.updateAddress(user.id, addressId, updates);
     } catch (err) {
+      console.error('Error updating address:', err);
       setError(err as Error);
       throw err;
     }
   };
 
   const deleteAddress = async (addressId: string) => {
-    if (!firebaseUser?.uid) throw new Error('User not authenticated');
+    if (!user?.id) throw new Error('User not authenticated');
     
     try {
-      await firestoreService.deleteAddress(firebaseUser.uid, addressId);
+      await firestoreService.deleteAddress(user.id, addressId);
     } catch (err) {
+      console.error('Error deleting address:', err);
       setError(err as Error);
       throw err;
     }
   };
 
   const setDefaultAddress = async (addressId: string) => {
-    if (!firebaseUser?.uid) throw new Error('User not authenticated');
+    if (!user?.id) throw new Error('User not authenticated');
     
     try {
-      await firestoreService.setDefaultAddress(firebaseUser.uid, addressId);
+      await firestoreService.setDefaultAddress(user.id, addressId);
     } catch (err) {
+      console.error('Error setting default address:', err);
       setError(err as Error);
       throw err;
     }
