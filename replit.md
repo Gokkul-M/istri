@@ -10,18 +10,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Real-Time Updates Optimization (October 19, 2025)
+### Real-Time Updates & Error Handling (October 19, 2025)
 - ✅ **Address Auto-Selection in NewOrder**:
   - Auto-selects default address on initial page load
   - Falls back to first address if no default exists
   - Preserves user's manual selection when default changes remotely
   - Gracefully handles deleted addresses with automatic re-selection
+- ✅ **Fixed "No Address Found" Bug**:
+  - Added proper error handling to AddressManagement page
+  - Added error handling to NewOrder pickup address selection
+  - Shows IndexMissingError component with actionable guidance
+  - Prevents confusing "no address found" message when indexes are missing
 - ✅ **Real-Time Update Documentation**:
-  - Created comprehensive `REAL_TIME_UPDATES.md` guide
-  - Documented all collections using `onSnapshot` listeners
-  - Included testing procedures and troubleshooting guide
-  - Developer guide for adding new real-time features
-- ✅ **Verified Instant Updates**:
+  - Created `REAL_TIME_UPDATES.md` - Developer guide for real-time features
+  - Created `AUTO_RELOAD_GUIDE.md` - User-friendly auto-reload explanation
+  - Included testing procedures and troubleshooting guides
+  - Multi-tab and cross-device testing scenarios
+- ✅ **Verified Instant Updates** (Auto-Reload):
   - Addresses: Create/update/delete operations reflect instantly
   - Orders: Real-time synchronization across all user roles
   - Coupons: Instant availability updates
