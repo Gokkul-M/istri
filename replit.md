@@ -10,6 +10,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Real-Time Updates Optimization (October 19, 2025)
+- ✅ **Address Auto-Selection in NewOrder**:
+  - Auto-selects default address on initial page load
+  - Falls back to first address if no default exists
+  - Preserves user's manual selection when default changes remotely
+  - Gracefully handles deleted addresses with automatic re-selection
+- ✅ **Real-Time Update Documentation**:
+  - Created comprehensive `REAL_TIME_UPDATES.md` guide
+  - Documented all collections using `onSnapshot` listeners
+  - Included testing procedures and troubleshooting guide
+  - Developer guide for adding new real-time features
+- ✅ **Verified Instant Updates**:
+  - Addresses: Create/update/delete operations reflect instantly
+  - Orders: Real-time synchronization across all user roles
+  - Coupons: Instant availability updates
+  - Services: Real-time price and availability changes
+  - Disputes: Immediate status and response updates
+- ℹ️ **No Page Refresh Needed**: All CRUD operations use Firebase real-time listeners
+
 ### Firebase Backend Setup & Testing (October 19, 2025)
 - ✅ **Firebase Credentials Configured**:
   - All 6 environment variables set in Replit Secrets
