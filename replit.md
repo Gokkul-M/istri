@@ -2,185 +2,11 @@
 
 ## Overview
 
-ShineCycle is a comprehensive laundry service platform connecting customers with laundry service providers for doorstep pickup and delivery. It offers business management tools for launderers and full administrative oversight. The platform features a mobile-first design, real-time order tracking, QR code verification, and role-based access control. Built with React, TypeScript, and Firebase, ShineCycle aims to streamline laundry operations and enhance user experience, capturing a significant share of the on-demand laundry market.
+ShineCycle is a comprehensive laundry service platform designed to connect customers with laundry service providers for doorstep pickup and delivery. It provides robust business management tools for launderers and full administrative oversight. The platform features a mobile-first design, real-time order tracking, QR code verification, and role-based access control. Built with React, TypeScript, and Firebase, ShineCycle aims to streamline laundry operations, enhance user experience, and capture a significant share of the on-demand laundry market.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-
-## Recent Changes
-
-### Comprehensive Real-Time Order Details System (October 19, 2025)
-- ✅ **useFirebaseOrder Hook**: Created custom hook for real-time single order fetching
-  - Uses Firestore `onSnapshot` for live order updates
-  - Automatic data synchronization when order changes
-  - Error handling and loading states
-- ✅ **Customer Order Details Page**: Complete rebuild with real Firebase data
-  - Real-time order information with auto-updates
-  - Full status timeline visualization (pending → completed)
-  - QR code display for order verification
-  - Invoice download functionality (PDF generation)
-  - **Inline Rating & Feedback System**:
-    * 5-star rating UI with hover effects
-    * Optional feedback text area
-    * Saves ratings/feedback directly to Firestore (order.rating, order.feedback)
-    * Shows existing ratings for rated orders
-  - **Dispute/Support Dialog**:
-    * Subject, description, and priority fields
-    * Creates disputes in Firestore `disputes` collection
-    * Integrated with useFirebaseDisputes hook
-  - Comprehensive order details (items, pricing, discounts, coupons)
-  - Skeleton loading states and error handling
-- ✅ **Launderer Order Details Page**: New page for launderers to manage orders
-  - Real-time order data synchronization
-  - Customer information display (name, phone, address)
-  - Order status management with dropdown selector
-  - Status progression: pending → confirmed → picked_up → in_progress → ready → out_for_delivery → completed
-  - **Customer Rating Display**: Shows ratings and feedback from customers
-  - **Dispute Display**: Lists all disputes/issues reported for the order with status tracking
-  - QR code access for verification
-  - Order items and pricing breakdown
-- ✅ **Routing Integration**: Added routes for order details pages
-  - Customer: `/customer/order/:orderId`
-  - Launderer: `/launderer/order/:orderId`
-  - Already linked from order history and order management pages
-- ✅ **State Management**: Fixed critical issues with rating persistence
-  - Rating/feedback state syncs from loaded order via useEffect
-  - Prevents data loss when editing existing ratings
-  - Properly displays previously stored ratings and feedback
-
-### Firebase Integration & UX Improvements (October 18, 2025)
-- ✅ **Special Promotions Real-Time Data**: Customer dashboard now fetches live coupons
-  - Replaced hardcoded promotion with Firebase coupons from admin panel
-  - Uses useFirebaseCoupons hook to fetch active coupons in real-time
-  - Displays first active coupon with description and code
-  - Shows empty state when no active promotions exist
-  - Loading skeleton while fetching data
-- ✅ **Logout Functionality**: Added working logout for all user roles
-  - Customer sidebar: Logout redirects to login page after signOut
-  - Launderer sidebar: Logout redirects to login page after signOut
-  - Admin sidebar: Logout redirects to login page after signOut
-  - Uses Firebase Auth signOut method from useAuth hook
-  - All logout buttons include data-testid for testing
-- ✅ **Customer Navigation Cleanup**: Removed payment methods from sidebar
-  - Payment Methods link removed from customer sidebar navigation
-  - Streamlined navigation with only essential features
-  - Better user experience with focused navigation
-
-### Android White Screen Fix (October 18, 2025)
-- ✅ **Fixed Vite Base Path**: Added `base: './'` to vite.config.ts
-  - Critical fix for Capacitor apps to use relative asset paths
-  - Resolves white screen issue when loading APK on Android devices
-- ✅ **Changed to HashRouter**: Switched from BrowserRouter to HashRouter
-  - Better compatibility with Android WebView
-  - More reliable routing in mobile Capacitor apps
-- ✅ **Mobile Build Optimizations**: Added Terser minification and console stripping
-  - Production builds drop console logs automatically
-  - Optimized chunk sizes for mobile performance
-- ✅ **Documentation**: Created ANDROID_WHITE_SCREEN_FIX.md with debugging guide
-  - Complete rebuild instructions
-  - Chrome DevTools inspection guide
-  - Common error solutions
-
-### Android Mobile App Configuration (October 17, 2025)
-- ✅ **Capacitor Android Setup**: Complete configuration for Play Store deployment
-  - Updated capacitor.config.ts with optimized Android settings
-  - Configured Camera, Geolocation, SplashScreen, and PushNotifications plugins
-  - Min WebView version set to 55 for better compatibility
-- ✅ **Build Scripts**: Added comprehensive NPM scripts for Android development
-  - `npm run android:sync` - Build web app and sync to Android platform
-  - `npm run android:open` - Open project in Android Studio
-  - `npm run android:run` - Complete build, sync, and open workflow
-  - `npm run android:build` - Generate release APK for testing
-  - `npm run android:bundle` - Generate AAB for Google Play Store submission
-- ✅ **Android Build Configuration**: Production-ready Gradle setup
-  - Enabled minification and resource shrinking for release builds
-  - ProGuard optimization configured
-  - Signing configuration template added (ready for keystore)
-  - Debug and release build variants configured
-- ✅ **Comprehensive Documentation**: Three detailed guides created
-  - **ANDROID_DEPLOYMENT.md**: Complete Play Store deployment guide
-    - Firebase Android setup instructions
-    - Signing key generation process
-    - Play Store listing requirements
-    - Version management and updates
-  - **ANDROID_APP_ICONS.md**: Icon and branding configuration
-    - All density requirements and specifications
-    - Adaptive icon setup for Android 8.0+
-    - Splash screen customization guide
-    - Play Store asset requirements (feature graphic, screenshots)
-  - **ANDROID_QUICK_START.md**: Developer quick reference
-    - Android Studio setup steps
-    - Firebase integration walkthrough
-    - Build and test workflow
-    - Troubleshooting common issues
-- ✅ **Android Platform**: Already initialized with proper structure
-  - AndroidManifest.xml with all required permissions (Camera, Location, Notifications)
-  - Build configuration with Firebase support
-  - FileProvider configured for image handling
-  - google-services.json.example template provided
-
-### Data & UI Improvements (October 17, 2025)
-- ✅ **Customer Dashboard Enhancement**: Added total spent calculation
-  - Now displays total amount spent from completed orders only
-  - Shows both total orders count and total spent side-by-side in profile section
-  - Real-time calculation from Firebase order data
-- ✅ **Admin Service Management Redesign**: Converted to global service management
-  - **BREAKING CHANGE**: Services are now global, not launderer-specific
-  - Admin can create, edit, and delete services that appear in all new orders
-  - Full CRUD operations with Firebase integration
-  - Modern UI with service cards, search functionality
-  - Services include: name, price, description, and icon
-- ✅ **Admin Complaints Page**: Removed all dummy data
-  - Now 100% Firebase real-time data from `disputes` collection
-  - Live ticket updates with status tracking (pending, in_progress, resolved)
-  - Reply functionality with timestamp tracking
-  - Empty state when no complaints exist
-  - Stats cards show real counts (total, pending, active, resolved)
-- ✅ **Admin Payments/Revenue Page**: Removed dummy data
-  - All percentage indicators and fake trends removed
-  - Real revenue calculation from completed orders
-  - Pending orders count now shows actual pending orders (not fake amount)
-  - Charts populated with real Firebase order data
-  - Monthly revenue trend based on actual order dates
-- ✅ **Admin Order Management**: Enhanced mobile-first design
-  - Modern gradient cards with improved spacing and shadows
-  - Better visual hierarchy with icons and badges
-  - Customer info displayed in highlighted cards
-  - Order items shown in clean grid layout
-  - Enhanced launderer selection with star ratings
-  - Loading states with skeleton components
-  - Improved status badges with better colors
-
-### Local Development Setup & Firestore Index Fix (October 17, 2025)
-- ✅ **Environment Configuration**: Created centralized `.env` setup for local development
-  - Added `.env.example` with all Firebase variables template
-  - Updated `.gitignore` to exclude `.env` files from version control
-  - All environment variables use `VITE_` prefix for Vite compatibility
-- ✅ **Comprehensive Documentation**: Created detailed local setup guide
-  - `LOCAL_SETUP.md` with step-by-step instructions for VS Code setup
-  - Firebase service configuration guide (Auth, Firestore, Storage)
-  - Firestore & Storage security rules included
-  - **CRITICAL: Firestore composite indexes setup** (required for queries to work)
-  - Initial data setup instructions (services, coupons)
-  - Test account creation guide
-  - Troubleshooting section for common issues
-- ✅ **Firebase Indexes Guide**: Created `FIREBASE_INDEXES.md`
-  - **Fixes "Request contains an invalid argument" error**
-  - Step-by-step index creation instructions
-  - Direct links to auto-create indexes in Firebase Console
-  - Required indexes: orders(customerId+createdAt), orders(laundererId+createdAt)
-  - Quick fix using error links from browser console
-- ✅ **Updated README**: Professional project overview
-  - Complete tech stack documentation
-  - Architecture and features overview
-  - Deployment instructions for local, Replit, and mobile
-  - Quick start guide with npm commands
-  - Project structure visualization
-- ✅ **Vite Configuration**: Already configured for local development
-  - Port 5000 with strict port binding
-  - Host set to 0.0.0.0 for accessibility
-  - Path aliases configured (@/ for src/)
 
 ## System Architecture
 
@@ -212,7 +38,7 @@ Preferred communication style: Simple, everyday language.
 
 **Authentication Service:**
 - Firebase Authentication with email/password for all users (customers, launderers, admins)
-- Unified login flow (`/login`) and signup (`/signup`) with role selection
+- Unified login and signup flows with role selection
 - Firebase Auth state management with custom hooks, logout, and account deletion functionality
 - 7-day authentication persistence using `browserLocalPersistence`
 
@@ -228,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 - `userSettings` (preferences)
 - `orders` (items, status, tracking)
 - `messages` (customer-launderer communication)
-- `services` (laundry service catalog)
+- `services` (laundry service catalog, now global)
 - `coupons` (promotional discount codes)
 - `disputes` (complaints)
 - Addresses subcollection (`users/{userId}/addresses`)
@@ -237,6 +63,7 @@ Preferred communication style: Simple, everyday language.
 - Custom hooks for live updates from Firestore using `onSnapshot`
 - Role-based query filters and Firestore Security Rules for data security
 - Unique order IDs generated by Firestore `addDoc()`
+- Critical Firestore composite indexes for efficient queries.
 
 ### File Storage
 
@@ -249,6 +76,7 @@ Preferred communication style: Simple, everyday language.
 - Native iOS and Android app capabilities via Capacitor
 - Includes Camera, Geolocation, Push, Haptics, Share, Splash plugins
 - Touch-optimized UI and native QR scanning
+- `base: './'` in `vite.config.ts` and `HashRouter` for Android compatibility.
 
 ### Order Management System
 
@@ -259,16 +87,17 @@ Preferred communication style: Simple, everyday language.
 - Launderer acceptance/rejection and processing via a scanner (`/launderer/scan`)
 - Real-time status updates (pending → confirmed → picked_up → in_progress → ready → out_for_delivery → completed)
 - Invoice generation and download (PDF using jsPDF)
-- Post-completion rating and feedback
+- Post-completion rating and feedback with persistence.
 
 ### Admin Dashboard
 
 **Oversight Capabilities:**
 - Real-time metrics (orders, revenue, users)
-- User, service, and coupon management (CRUD operations)
-- Dispute resolution
+- User, global service, and coupon management (CRUD operations)
+- Dispute resolution with live ticket updates and reply functionality
 - Order assignment to launderers
 - System-wide settings and announcements
+- Real revenue calculation and trend analysis from completed orders.
 
 ## External Dependencies
 
