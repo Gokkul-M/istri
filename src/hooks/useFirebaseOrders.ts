@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, orderBy, limit, QuerySnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Order, OrderStatus } from '@/store/useStore';
 import { useAuth } from './useFirebaseAuth';
@@ -55,7 +55,7 @@ export function useFirebaseOrders(limitCount: number = 50) {
       const unsubscribe = onSnapshot(
         ordersQuery!,
         {
-          next: (snapshot) => {
+          next: (snapshot: QuerySnapshot) => {
             const ordersData = snapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data()
