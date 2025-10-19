@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { QRScannerModal } from "@/components/QRScannerModal";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,6 +31,7 @@ const LaundererDashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { orders, loading, updateOrder } = useFirebaseOrders();
+  const { profile } = useProfile(user?.id || null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [processingOrders, setProcessingOrders] = useState<Set<string>>(new Set());
 
@@ -38,6 +40,29 @@ const LaundererDashboard = () => {
   const totalRevenue = orders
     .filter(o => o.status === "completed")
     .reduce((acc, order) => acc + order.totalAmount, 0);
+
+  const weeklyOrders = useMemo(() => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    return orders.filter(order => {
+      if (!order.createdAt) return false;
+      try {
+        const orderDate = new Date(order.createdAt as any);
+        return !isNaN(orderDate.getTime()) && orderDate >= oneWeekAgo;
+      } catch {
+        return false;
+      }
+    }).length;
+  }, [orders]);
+
+  const averageRating = useMemo(() => {
+    const ordersWithRatings = completedOrders.filter(order => order.rating && order.rating > 0);
+    if (ordersWithRatings.length === 0) return '0';
+    
+    const totalRating = ordersWithRatings.reduce((acc, order) => acc + (order.rating || 0), 0);
+    return (totalRating / ordersWithRatings.length).toFixed(1);
+  }, [completedOrders]);
 
   const handleAcceptOrder = async (orderId: string) => {
     setProcessingOrders(prev => new Set(prev).add(orderId));
@@ -120,18 +145,22 @@ const LaundererDashboard = () => {
                       <Briefcase className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-white font-bold text-lg">Fresh Laundry Co.</h2>
-                      <p className="text-white/80 text-sm">Premium Service</p>
+                      <h2 className="text-white font-bold text-lg">
+                        {profile?.businessName || profile?.name || 'My Business'}
+                      </h2>
+                      <p className="text-white/80 text-sm">Laundry Service</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3">
                       <p className="text-white/70 text-xs">This Week</p>
-                      <p className="text-white font-bold text-lg">45 Orders</p>
+                      <p className="text-white font-bold text-lg">{weeklyOrders} Orders</p>
                     </div>
                     <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-3">
                       <p className="text-white/70 text-xs">Rating</p>
-                      <p className="text-white font-bold text-lg">4.8 ⭐</p>
+                      <p className="text-white font-bold text-lg">
+                        {averageRating !== '0' ? `${averageRating} ⭐` : 'No ratings'}
+                      </p>
                     </div>
                   </div>
                 </div>
