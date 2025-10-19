@@ -34,6 +34,7 @@ import { useFirebaseServices } from "@/hooks/useFirebaseServices";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { useAuth } from "@/hooks/useFirebaseAuth";
 import { useFirebaseCoupons } from "@/hooks/useFirebaseCoupons";
+import { IndexMissingError } from "@/components/IndexMissingError";
 
 // Cloth items for counting
 const clothItems = [
@@ -50,7 +51,7 @@ const NewOrder = () => {
   const { user } = useAuth();
   const { services, loading: servicesLoading } = useFirebaseServices();
   const { createOrder } = useFirebaseOrders();
-  const { addresses, defaultAddress, loading: addressesLoading, addAddress } = useAddresses();
+  const { addresses, defaultAddress, loading: addressesLoading, error: addressError, addAddress } = useAddresses();
   const { coupons, incrementCouponUsage } = useFirebaseCoupons();
 
   const [step, setStep] = useState<"services" | "details" | "confirm">(
@@ -680,7 +681,11 @@ const NewOrder = () => {
                     Pickup Address
                   </Label>
                   
-                  {addressesLoading ? (
+                  {addressError && (addressError as any).code === 'failed-precondition' ? (
+                    <IndexMissingError 
+                      message="Your addresses require a database index to be created. Please create the required index for the 'addresses' collection." 
+                    />
+                  ) : addressesLoading ? (
                     <Skeleton className="h-20 rounded-2xl" />
                   ) : addresses.length > 0 ? (
                     <>

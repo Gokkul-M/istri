@@ -12,10 +12,11 @@ import { ArrowLeft, MapPin, Plus, Edit2, Trash2, Home, Briefcase, Building } fro
 import { useToast } from "@/hooks/use-toast";
 import { useAddresses } from "@/hooks/useAddresses";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IndexMissingError } from "@/components/IndexMissingError";
 
 const AddressManagement = () => {
   const { toast } = useToast();
-  const { addresses, loading, addAddress, updateAddress, deleteAddress, setDefaultAddress } = useAddresses();
+  const { addresses, loading, error, addAddress, updateAddress, deleteAddress, setDefaultAddress } = useAddresses();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
@@ -282,7 +283,11 @@ const AddressManagement = () => {
       </div>
 
       <div className="px-6 space-y-3">
-        {loading ? (
+        {error && (error as any).code === 'failed-precondition' ? (
+          <IndexMissingError 
+            message="Your addresses require a database index to be created. Please create the required index for the 'addresses' collection." 
+          />
+        ) : loading ? (
           <>
             <Skeleton className="h-32 rounded-[2rem]" />
             <Skeleton className="h-32 rounded-[2rem]" />
