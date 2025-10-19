@@ -356,9 +356,9 @@ export class FirestoreService {
 
   // Addresses
   async getUserAddresses(userId: string): Promise<Address[]> {
+    // Temporarily use single orderBy to test if basic query works
     const q = query(
       collection(db, 'users', userId, 'addresses'),
-      orderBy('isDefault', 'desc'),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await getDocs(q);
@@ -443,9 +443,9 @@ export class FirestoreService {
   }
 
   onAddressesChange(userId: string, callback: (addresses: Address[]) => void, onError?: (error: Error) => void) {
+    // Temporarily use single orderBy to test if basic query works
     const q = query(
       collection(db, 'users', userId, 'addresses'),
-      orderBy('isDefault', 'desc'),
       orderBy('createdAt', 'desc')
     );
     return onSnapshot(q, 
@@ -456,8 +456,13 @@ export class FirestoreService {
         } as Address));
         callback(addresses);
       },
-      (error) => {
+      (error: any) => {
         console.error('Address listener error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        if (error.message) {
+          console.error('Full error message:', error.message);
+        }
         if (onError) {
           onError(error as Error);
         }
