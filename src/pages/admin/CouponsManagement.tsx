@@ -51,31 +51,35 @@ const CouponsManagement = () => {
     coupon.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddCoupon = () => {
+  const handleAddCoupon = async () => {
     if (!newCoupon.code || !newCoupon.description) {
       toast.error("Please fill all required fields");
       return;
     }
 
-    const coupon = {
-      id: `CPN${Date.now()}`,
-      ...newCoupon,
-      usedCount: 0,
-      isActive: true,
-      createdBy: "ADMIN",
-    };
+    try {
+      const coupon = {
+        ...newCoupon,
+        usedCount: 0,
+        isActive: true,
+        createdBy: "ADMIN",
+      };
 
-    addCoupon(coupon);
-    toast.success("Coupon created successfully");
-    setIsAddDialogOpen(false);
-    setNewCoupon({
-      code: "",
-      discount: 10,
-      description: "",
-      validFrom: new Date().toISOString().split('T')[0],
-      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      usageLimit: 100,
-    });
+      await addCoupon(coupon);
+      toast.success("Coupon created successfully");
+      setIsAddDialogOpen(false);
+      setNewCoupon({
+        code: "",
+        discount: 10,
+        description: "",
+        validFrom: new Date().toISOString().split('T')[0],
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        usageLimit: 100,
+      });
+    } catch (error) {
+      toast.error("Failed to create coupon");
+      console.error("Create error:", error);
+    }
   };
 
   const handleDeleteCoupon = async () => {
