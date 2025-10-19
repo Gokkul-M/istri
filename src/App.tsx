@@ -45,6 +45,7 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import CouponsManagement from "./pages/admin/CouponsManagement";
 import AdminServicesManagement from "./pages/admin/ServicesManagement";
 import AdminDisputeResolution from "./pages/admin/DisputeResolution";
+import Migration from "./pages/admin/Migration";
 import { AdminLayout } from "./components/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -97,6 +98,7 @@ const App = () => (
           <Route path="/admin/profile" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminProfile /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/coupons" element={<ProtectedRoute requiredRole="admin"><AdminLayout><CouponsManagement /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/services" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminServicesManagement /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/migration" element={<ProtectedRoute requiredRole="admin"><AdminLayout><Migration /></AdminLayout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>

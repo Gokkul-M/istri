@@ -8,6 +8,43 @@ ShineCycle is a comprehensive laundry service platform designed to connect custo
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Custom User ID System Implementation (October 19, 2025)
+- ✅ **ID Generation Service** (`src/lib/firebase/idGenerator.ts`):
+  - Auto-incrementing counter system for generating unique IDs
+  - Format: `CUST-0001`, `LAUN-0001`, `ADMIN-0001`
+  - Thread-safe ID generation using Firestore transactions
+  - Bidirectional mapping between Firebase UIDs and custom IDs
+- ✅ **Updated Authentication Flow**:
+  - Modified signup to generate custom IDs automatically
+  - User documents now use custom IDs as document IDs
+  - Firebase UID stored as reference field (`firebaseUid`)
+  - Login resolves Firebase UID to custom ID seamlessly
+- ✅ **Migration System** (`src/lib/firebase/migration.ts`):
+  - Comprehensive migration utility for existing users
+  - Updates all related documents (orders, disputes, messages, addresses)
+  - Maintains data integrity and relationships
+  - Admin UI at `/admin/migration` for easy migration
+- ✅ **New Firestore Collections**:
+  - `counters`: Tracks next ID number for each role
+  - `userMapping`: Firebase UID → Custom ID lookup
+  - `customIdMapping`: Custom ID → Firebase UID reverse lookup
+- ✅ **Database Schema Updates**:
+  - User.id: Now contains custom ID (CUST-0001, etc.)
+  - User.firebaseUid: New field storing Firebase Auth UID
+  - All user references use custom IDs consistently
+- ⚠️ **Required Setup**:
+  - Firestore security rules must be updated (see FIRESTORE_RULES.md)
+  - Migration must be run for existing users via Admin panel at `/admin/migration`
+  - Composite indexes still needed (addresses, disputes, orders)
+
+### Real-Time Order Details System (October 19, 2025)
+- ✅ Customer and Launderer order details pages with real-time Firebase data
+- ✅ Inline rating and feedback system for completed orders
+- ✅ Dispute/support dialog integrated into order details
+- ✅ QR code display and invoice download functionality
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -50,14 +87,17 @@ Preferred communication style: Simple, everyday language.
 ### Data Layer
 
 **Firebase Firestore Collections:**
-- `users` (profiles, roles, business details)
+- `users` (profiles, roles, business details) - **Uses custom IDs as document IDs**
 - `userSettings` (preferences)
-- `orders` (items, status, tracking)
+- `orders` (items, status, tracking) - References users by custom ID
 - `messages` (customer-launderer communication)
 - `services` (laundry service catalog, now global)
 - `coupons` (promotional discount codes)
-- `disputes` (complaints)
-- Addresses subcollection (`users/{userId}/addresses`)
+- `disputes` (complaints) - References users by custom ID
+- `counters` (ID generation counters) - **NEW**
+- `userMapping` (Firebase UID → Custom ID) - **NEW**
+- `customIdMapping` (Custom ID → Firebase UID) - **NEW**
+- Addresses subcollection (`users/{customId}/addresses`)
 
 **Real-Time Data Synchronization:**
 - Custom hooks for live updates from Firestore using `onSnapshot`
