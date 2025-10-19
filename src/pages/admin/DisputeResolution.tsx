@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -102,49 +103,49 @@ const DisputeResolution = () => {
   const resolvedDisputes = filterDisputes('resolved');
 
   return (
-    <div className="p-4 space-y-4 pb-20">
-      <div>
-        <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent tracking-tight">Dispute Resolution</h1>
-        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">Mediate between customers and launderers</p>
+    <div className="p-6 space-y-6 pb-24">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent tracking-tight">Dispute Resolution</h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">Mediate and resolve issues between customers and launderers</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="border-none shadow-soft rounded-[1.5rem]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-yellow-500/10 p-2 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-yellow-500/5 to-background backdrop-blur-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="bg-yellow-500/15 p-3 rounded-[1.25rem] shadow-sm">
+                <AlertCircle className="w-6 h-6 text-yellow-600" />
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Open</p>
-                <h3 className="text-xl font-bold">{openDisputes.length}</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-soft rounded-[1.5rem]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-500/10 p-2 rounded-[1.25rem]">
-                <MessageSquare className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">In Progress</p>
-                <h3 className="text-xl font-bold">{inProgressDisputes.length}</h3>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground font-medium mb-1">Open Disputes</p>
+                <h3 className="text-2xl font-bold text-yellow-700">{openDisputes.length}</h3>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-soft rounded-[1.5rem]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-500/10 p-2 rounded-[1.25rem]">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+        <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-blue-500/5 to-background backdrop-blur-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-500/15 p-3 rounded-[1.25rem] shadow-sm">
+                <MessageSquare className="w-6 h-6 text-blue-600" />
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Resolved</p>
-                <h3 className="text-xl font-bold">{resolvedDisputes.length}</h3>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground font-medium mb-1">In Progress</p>
+                <h3 className="text-2xl font-bold text-blue-700">{inProgressDisputes.length}</h3>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-green-500/5 to-background backdrop-blur-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="bg-green-500/15 p-3 rounded-[1.25rem] shadow-sm">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground font-medium mb-1">Resolved</p>
+                <h3 className="text-2xl font-bold text-green-700">{resolvedDisputes.length}</h3>
               </div>
             </div>
           </CardContent>
@@ -153,115 +154,139 @@ const DisputeResolution = () => {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
-          placeholder="Search disputes..."
+          placeholder="Search disputes by subject, order ID, or description..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-12 h-12 rounded-[1.5rem] border-border/50 bg-background/50 backdrop-blur-sm"
         />
       </div>
 
       {/* Disputes Tabs */}
       <Tabs defaultValue="open" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="open">Open ({openDisputes.length})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({inProgressDisputes.length})</TabsTrigger>
-          <TabsTrigger value="resolved">Resolved ({resolvedDisputes.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-12 rounded-[1.5rem] p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsTrigger value="open" className="rounded-[1.25rem] data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Open ({openDisputes.length})
+          </TabsTrigger>
+          <TabsTrigger value="in_progress" className="rounded-[1.25rem] data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            In Progress ({inProgressDisputes.length})
+          </TabsTrigger>
+          <TabsTrigger value="resolved" className="rounded-[1.25rem] data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Resolved ({resolvedDisputes.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="open" className="space-y-3">
-          {openDisputes.map((dispute) => {
-            const details = getDisputeDetails(dispute.id);
-            if (!details) return null;
-            const { order, customer, launderer } = details;
+        <TabsContent value="open" className="space-y-4 mt-6">
+          {openDisputes.length === 0 ? (
+            <Card className="rounded-[2rem] p-12 text-center shadow-soft border-border/30 bg-gradient-to-br from-background to-background/50">
+              <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="font-semibold mb-2">No Open Disputes</h3>
+              <p className="text-sm text-muted-foreground">All disputes have been addressed</p>
+            </Card>
+          ) : (
+            openDisputes.map((dispute) => {
+              const details = getDisputeDetails(dispute.id);
+              if (!details) return null;
+              const { order, customer, launderer } = details;
 
               return (
-                <Card key={dispute.id} className="border-none shadow-medium rounded-[1.5rem]">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold mb-1">{dispute.subject}</h3>
-                      <p className="text-sm text-muted-foreground">Order: {dispute.orderId}</p>
+                <Card key={dispute.id} className="border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-background to-background/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-1.5">{dispute.subject}</h3>
+                      <p className="text-sm text-muted-foreground font-medium">Order #{dispute.orderId.slice(-8).toUpperCase()}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 items-end">
                       {getStatusBadge(dispute.status)}
                       {getPriorityBadge(dispute.priority)}
                     </div>
                   </div>
 
-                  <p className="text-sm mb-3">{dispute.description}</p>
+                  <p className="text-sm leading-relaxed mb-4 text-foreground/90">{dispute.description}</p>
 
-                  <div className="space-y-2 mb-3 p-3 bg-muted/50 rounded-lg">
+                  <Separator className="my-4" />
+
+                  <div className="space-y-3 mb-4 p-4 bg-muted/30 rounded-[1.25rem] backdrop-blur-sm">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Customer</span>
-                      <span className="font-medium">{customer?.name}</span>
+                      <span className="text-muted-foreground font-medium">Customer</span>
+                      <span className="font-semibold">{customer?.name}</span>
                     </div>
+                    <Separator className="opacity-50" />
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Launderer</span>
-                      <span className="font-medium">{launderer?.businessName || launderer?.name}</span>
+                      <span className="text-muted-foreground font-medium">Launderer</span>
+                      <span className="font-semibold">{launderer?.businessName || launderer?.name}</span>
                     </div>
+                    <Separator className="opacity-50" />
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Order Amount</span>
-                      <span className="font-semibold text-primary">₹{order?.totalAmount}</span>
+                      <span className="text-muted-foreground font-medium">Order Amount</span>
+                      <span className="font-bold text-primary text-base">₹{order?.totalAmount}</span>
                     </div>
                   </div>
 
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full"
+                        className="w-full h-12 rounded-[1.5rem] shadow-md hover:shadow-lg transition-all"
+                        variant="hero"
                         onClick={() => setSelectedDispute(dispute.id)}
                       >
                         Take Action
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[550px] rounded-[2rem]">
                       <DialogHeader>
-                        <DialogTitle>Resolve Dispute</DialogTitle>
+                        <DialogTitle className="text-xl">Resolve Dispute</DialogTitle>
                         <DialogDescription>
                           Review and resolve this dispute between customer and launderer
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Admin Notes</Label>
+                      <div className="space-y-5 mt-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">Admin Notes</Label>
                           <Textarea
                             placeholder="Internal notes about this dispute..."
                             value={adminNotes}
                             onChange={(e) => setAdminNotes(e.target.value)}
                             rows={3}
+                            className="rounded-[1.25rem] resize-none"
                           />
                         </div>
-                        <div>
-                          <Label>Resolution Details</Label>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">Resolution Details</Label>
                           <Textarea
                             placeholder="Resolution details to share with both parties..."
                             value={resolution}
                             onChange={(e) => setResolution(e.target.value)}
                             rows={3}
+                            className="rounded-[1.25rem] resize-none"
                           />
                         </div>
-                        <div className="flex gap-2">
+                        <Separator />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              className="flex-1 h-11 rounded-[1.25rem]"
+                              onClick={() => handleUpdateStatus(dispute.id, 'in_progress')}
+                            >
+                              Mark In Progress
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1 h-11 rounded-[1.25rem] text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => handleUpdateStatus(dispute.id, 'rejected')}
+                            >
+                              Reject
+                            </Button>
+                          </div>
                           <Button
-                            variant="outline"
-                            className="flex-1"
-                            onClick={() => handleUpdateStatus(dispute.id, 'in_progress')}
-                          >
-                            Mark In Progress
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="flex-1"
-                            onClick={() => handleUpdateStatus(dispute.id, 'rejected')}
-                          >
-                            Reject
-                          </Button>
-                          <Button
-                            className="flex-1"
+                            variant="hero"
+                            className="w-full h-11 rounded-[1.25rem]"
                             onClick={() => handleUpdateStatus(dispute.id, 'resolved')}
                           >
-                            Resolve
+                            Resolve Dispute
                           </Button>
                         </div>
                       </div>
@@ -269,34 +294,45 @@ const DisputeResolution = () => {
                   </Dialog>
                 </CardContent>
               </Card>
-            );
-          })}
+              );
+            })
+          )}
         </TabsContent>
 
-        <TabsContent value="in_progress" className="space-y-3">
-          {inProgressDisputes.map((dispute) => {
-            const details = getDisputeDetails(dispute.id);
-            if (!details) return null;
-            const { order, customer, launderer } = details;
+        <TabsContent value="in_progress" className="space-y-4 mt-6">
+          {inProgressDisputes.length === 0 ? (
+            <Card className="rounded-[2rem] p-12 text-center shadow-soft border-border/30 bg-gradient-to-br from-background to-background/50">
+              <MessageSquare className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="font-semibold mb-2">No Disputes In Progress</h3>
+              <p className="text-sm text-muted-foreground">No disputes are currently being worked on</p>
+            </Card>
+          ) : (
+            inProgressDisputes.map((dispute) => {
+              const details = getDisputeDetails(dispute.id);
+              if (!details) return null;
+              const { order, customer, launderer } = details;
 
               return (
-                <Card key={dispute.id} className="border-none shadow-medium rounded-[1.5rem]">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold mb-1">{dispute.subject}</h3>
-                      <p className="text-sm text-muted-foreground">Order: {dispute.orderId}</p>
+                <Card key={dispute.id} className="border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-blue-500/5 to-background/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-1.5">{dispute.subject}</h3>
+                      <p className="text-sm text-muted-foreground font-medium">Order #{dispute.orderId.slice(-8).toUpperCase()}</p>
                     </div>
                     {getStatusBadge(dispute.status)}
                   </div>
 
-                  <p className="text-sm mb-3">{dispute.description}</p>
+                  <p className="text-sm leading-relaxed mb-4 text-foreground/90">{dispute.description}</p>
 
                   {dispute.adminNotes && (
-                    <div className="mb-3 p-3 bg-blue-500/10 rounded-lg">
-                      <p className="text-xs font-semibold text-blue-700 mb-1">Admin Notes:</p>
-                      <p className="text-sm">{dispute.adminNotes}</p>
-                    </div>
+                    <>
+                      <Separator className="my-4" />
+                      <div className="mb-4 p-4 bg-blue-500/10 rounded-[1.25rem] border border-blue-200/50">
+                        <p className="text-xs font-bold text-blue-700 mb-2 uppercase tracking-wide">Admin Notes</p>
+                        <p className="text-sm text-blue-900/90 leading-relaxed">{dispute.adminNotes}</p>
+                      </div>
+                    </>
                   )}
 
                   <div className="flex gap-2">
@@ -304,39 +340,42 @@ const DisputeResolution = () => {
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline"
-                          className="flex-1"
+                          className="flex-1 h-11 rounded-[1.25rem] border-border/50"
                           onClick={() => setSelectedDispute(dispute.id)}
                         >
-                          Update
+                          Update Status
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-[550px] rounded-[2rem]">
                         <DialogHeader>
-                          <DialogTitle>Update Dispute</DialogTitle>
+                          <DialogTitle className="text-xl">Update Dispute</DialogTitle>
                           <DialogDescription>
                             Update the status of this dispute
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Resolution Details</Label>
+                        <div className="space-y-5 mt-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Resolution Details</Label>
                             <Textarea
-                              placeholder="Resolution details..."
+                              placeholder="Resolution details to share with both parties..."
                               value={resolution}
                               onChange={(e) => setResolution(e.target.value)}
-                              rows={3}
+                              rows={4}
+                              className="rounded-[1.25rem] resize-none"
                             />
                           </div>
+                          <Separator />
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
-                              className="flex-1"
+                              className="flex-1 h-11 rounded-[1.25rem] text-red-600 border-red-200 hover:bg-red-50"
                               onClick={() => handleUpdateStatus(dispute.id, 'rejected')}
                             >
-                              Reject
+                              Reject Dispute
                             </Button>
                             <Button
-                              className="flex-1"
+                              variant="hero"
+                              className="flex-1 h-11 rounded-[1.25rem]"
                               onClick={() => handleUpdateStatus(dispute.id, 'resolved')}
                             >
                               Resolve
@@ -348,42 +387,63 @@ const DisputeResolution = () => {
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
+              );
+            })
+          )}
         </TabsContent>
 
-        <TabsContent value="resolved" className="space-y-3">
-          {resolvedDisputes.map((dispute) => {
-            const details = getDisputeDetails(dispute.id);
-            if (!details) return null;
+        <TabsContent value="resolved" className="space-y-4 mt-6">
+          {resolvedDisputes.length === 0 ? (
+            <Card className="rounded-[2rem] p-12 text-center shadow-soft border-border/30 bg-gradient-to-br from-background to-background/50">
+              <CheckCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="font-semibold mb-2">No Resolved Disputes</h3>
+              <p className="text-sm text-muted-foreground">Resolved disputes will appear here</p>
+            </Card>
+          ) : (
+            resolvedDisputes.map((dispute) => {
+              const details = getDisputeDetails(dispute.id);
+              if (!details) return null;
 
               return (
-                <Card key={dispute.id} className="border-none shadow-medium rounded-[1.5rem]">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold mb-1">{dispute.subject}</h3>
-                      <p className="text-sm text-muted-foreground">Order: {dispute.orderId}</p>
+                <Card key={dispute.id} className="border-border/30 shadow-soft hover:shadow-medium transition-all duration-300 rounded-[2rem] bg-gradient-to-br from-green-500/5 to-background/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-1.5">{dispute.subject}</h3>
+                      <p className="text-sm text-muted-foreground font-medium">Order #{dispute.orderId.slice(-8).toUpperCase()}</p>
                     </div>
                     {getStatusBadge(dispute.status)}
                   </div>
 
-                  <p className="text-sm mb-3">{dispute.description}</p>
+                  <p className="text-sm leading-relaxed mb-4 text-foreground/90">{dispute.description}</p>
 
                   {dispute.resolution && (
-                    <div className="p-3 bg-green-500/10 rounded-lg mb-3">
-                      <p className="text-xs font-semibold text-green-700 mb-1">Resolution:</p>
-                      <p className="text-sm">{dispute.resolution}</p>
-                    </div>
+                    <>
+                      <Separator className="my-4" />
+                      <div className="p-4 bg-green-500/10 rounded-[1.25rem] mb-4 border border-green-200/50">
+                        <p className="text-xs font-bold text-green-700 mb-2 uppercase tracking-wide">Resolution</p>
+                        <p className="text-sm text-green-900/90 leading-relaxed">{dispute.resolution}</p>
+                      </div>
+                    </>
                   )}
 
-                  <div className="text-xs text-muted-foreground">
-                    Resolved on: {dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleDateString() : 'N/A'}
+                  <Separator className="my-4" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-medium">Resolved Date</span>
+                    <span className="text-sm font-semibold text-green-700">
+                      {dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      }) : 'N/A'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
+              );
+            })
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -6,12 +6,24 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 
 ## Recent Changes
 
-**October 19, 2025 - Customer Portal UI Enhancements**
+**October 19, 2025 - UI/UX Enhancements Across Customer & Admin Portals**
+
+*Customer Portal:*
 - Fixed Order Again card navigation in Customer Dashboard (corrected route from `/customer/orders/:id` to `/customer/order/:id`)
 - Added profile picture upload functionality to Settings page with file validation and toast notifications
 - Enhanced OrderHistory page styling with gradient cards, improved spacing, and better mobile responsiveness
 - Enhanced OrderDetails page styling with consistent card design, better visual hierarchy, and improved mobile padding
-- All changes use real-time Firebase data through `useProfile` and `useFirebaseOrders` hooks
+
+*Admin Portal:*
+- Completely redesigned Dispute Resolution page with modern gradient cards and glass-morphism effects
+- Enhanced stats cards with color-coded gradients (yellow/open, blue/in-progress, green/resolved) and hover effects
+- Improved search input with better placeholder text and larger touch targets
+- Redesigned dispute cards with better visual hierarchy, separators, and enhanced information display
+- Added empty states for all tabs with contextual icons and messaging
+- Enhanced dialog modals with better spacing, rounded corners, and improved button layouts
+- Color-coded resolution/notes sections for better visual distinction
+
+All changes use real-time Firebase data through custom hooks
 
 ## User Preferences
 
