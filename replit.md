@@ -10,6 +10,43 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 20, 2025 - Mobile App Build System for APK & IPA Generation**
+
+Created complete build system for generating Android APK and iOS IPA files:
+
+*Build Scripts Created:*
+- `build-android.sh` / `build-android.bat` - Automated Android APK build scripts
+- `ios-setup/build-ios.sh` - Automated iOS IPA build script
+- All scripts include error handling, progress indicators, and output location info
+
+*Package.json Build Commands:*
+- `android:build` - Build release APK (Linux/macOS)
+- `android:build:win` - Build release APK (Windows)
+- `android:build:debug` - Build debug APK for testing
+- `android:bundle` - Build AAB for Google Play Store
+- `android:clean` - Clean build artifacts
+- `ios:init` - Initialize iOS platform
+- `ios:build` - Archive iOS app
+- `ios:export` - Export IPA file
+- `mobile:doctor` - Verify Capacitor setup
+
+*Version Management:*
+- App version updated to 1.0.0 across all platforms
+- package.json: version "1.0.0"
+- android/app/build.gradle: versionName "1.0.0"
+
+*iOS Signing Configuration:*
+- `ios-setup/exportOptions.plist` - IPA export configuration with placeholders
+- `ios-setup/exportOptions.plist.example` - Template file
+- `ios-setup/README.md` - Complete signing setup guide
+- Supports app-store, ad-hoc, development, and enterprise distribution
+
+*Documentation Created:*
+- `BUILD_GUIDE.md` - Comprehensive 500+ line guide for both platforms
+- `QUICK_START_BUILD.md` - Fast-track build instructions
+- `ios-setup/README.md` - iOS-specific signing and configuration guide
+- Covers build process, signing, distribution, troubleshooting
+
 **October 20, 2025 - Mobile App Connectivity Verification**
 
 Completed comprehensive mobile app setup verification for Android and iOS:
