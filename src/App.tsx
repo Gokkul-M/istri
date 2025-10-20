@@ -27,6 +27,8 @@ import Notifications from "./pages/customer/Notifications";
 import OrderManagement from "./pages/launderer/OrderManagement";
 import LaundererOrderDetails from "./pages/launderer/OrderDetails";
 import LaundererDisputeResolution from "./pages/launderer/DisputeResolution";
+import LaundererDisputes from "./pages/launderer/Disputes";
+import LaundererFeedback from "./pages/launderer/Feedback";
 import BusinessProfile from "./pages/launderer/BusinessProfile";
 import LaundererProfile from "./pages/launderer/Profile";
 import ServicesManagement from "./pages/launderer/ServicesManagement";
@@ -82,7 +84,8 @@ const App = () => (
           <Route path="/launderer/scan" element={<QRScanner />} />
           <Route path="/launderer/orders" element={<OrderManagement />} />
           <Route path="/launderer/order/:orderId" element={<LaundererOrderDetails />} />
-          <Route path="/launderer/disputes" element={<LaundererDisputeResolution />} />
+          <Route path="/launderer/disputes" element={<LaundererDisputes />} />
+          <Route path="/launderer/feedback" element={<LaundererFeedback />} />
           <Route path="/launderer/profile" element={<LaundererProfile />} />
           <Route path="/launderer/business-profile" element={<BusinessProfile />} />
           <Route path="/launderer/services" element={<ServicesManagement />} />

@@ -25,6 +25,8 @@ import {
   Loader2,
   Check,
   X,
+  AlertCircle,
+  MessageSquare,
 } from "lucide-react";
 
 const LaundererDashboard = () => {
@@ -205,6 +207,30 @@ const LaundererDashboard = () => {
                         <TrendingUp className="w-5 h-5 text-accent" />
                       </div>
                       <span className="font-semibold text-foreground tracking-tight">Revenue & Earnings</span>
+                    </Link>
+
+                    <div className="h-px bg-border/50 my-4"></div>
+                    
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-3 mt-4">Support</p>
+
+                    <Link
+                      to="/launderer/disputes"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-yellow-500/10 active:bg-yellow-500/15 transition-all group"
+                    >
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-yellow-500/15 to-yellow-500/5 flex items-center justify-center group-hover:from-yellow-500/20 group-hover:to-yellow-500/10 transition-all shadow-sm">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <span className="font-semibold text-foreground tracking-tight">Disputes</span>
+                    </Link>
+
+                    <Link
+                      to="/launderer/feedback"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-blue-500/10 active:bg-blue-500/15 transition-all group"
+                    >
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-blue-500/15 to-blue-500/5 flex items-center justify-center group-hover:from-blue-500/20 group-hover:to-blue-500/10 transition-all shadow-sm">
+                        <MessageSquare className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <span className="font-semibold text-foreground tracking-tight">Customer Feedback</span>
                     </Link>
 
                     <div className="h-px bg-border/50 my-4"></div>
