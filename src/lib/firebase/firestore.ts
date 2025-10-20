@@ -18,6 +18,22 @@ import {
 import { db } from './config';
 import type { User, Order, Service, Coupon, Dispute, Message, Notification, UserRole, OrderStatus } from '@/store/useStore';
 
+export interface Feedback {
+  id: string;
+  orderId: string;
+  customerId: string;
+  customerName: string;
+  laundererId?: string;
+  laundererName?: string;
+  rating: number;
+  feedback: string;
+  type: 'rating' | 'general';
+  status: 'new' | 'reviewed';
+  createdAt: string;
+  reviewedAt?: string;
+  adminNotes?: string;
+}
+
 export interface Address {
   id: string;
   userId: string;
@@ -402,6 +418,50 @@ export class FirestoreService {
       } as Notification));
       callback(notifications);
     });
+  }
+
+  // Feedback
+  async createFeedback(feedback: Omit<Feedback, 'id' | 'createdAt'>) {
+    const docRef = await addDoc(collection(db, 'feedback'), {
+      ...feedback,
+      createdAt: Timestamp.now(),
+    });
+    return docRef.id;
+  }
+
+  async getAllFeedback(): Promise<Feedback[]> {
+    const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Feedback));
+  }
+
+  async getFeedbackByStatus(status: Feedback['status']): Promise<Feedback[]> {
+    const q = query(
+      collection(db, 'feedback'),
+      where('status', '==', status),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Feedback));
+  }
+
+  async updateFeedback(feedbackId: string, updates: Partial<Feedback>) {
+    await updateDoc(doc(db, 'feedback', feedbackId), {
+      ...updates,
+      reviewedAt: updates.status === 'reviewed' ? Timestamp.now() : undefined,
+    });
+  }
+
+  async deleteFeedback(feedbackId: string) {
+    await deleteDoc(doc(db, 'feedback', feedbackId));
   }
 
   // Addresses

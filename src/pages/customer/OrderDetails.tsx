@@ -99,7 +99,7 @@ const OrderDetails = () => {
   };
 
   const handleSubmitRating = async () => {
-    if (!order || !orderId) return;
+    if (!order || !orderId || !user) return;
 
     if (rating === 0) {
       toast({
@@ -116,6 +116,20 @@ const OrderDetails = () => {
         rating,
         feedback: feedback.trim() || undefined,
       });
+
+      if (feedback.trim()) {
+        await firestoreService.createFeedback({
+          orderId: order.id,
+          customerId: user.id,
+          customerName: user.name,
+          laundererId: order.laundererId,
+          laundererName: order.laundererName,
+          rating,
+          feedback: feedback.trim(),
+          type: 'rating',
+          status: 'new',
+        });
+      }
 
       toast({
         title: "Thank You!",
