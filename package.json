@@ -1,7 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "shinecycle",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,15 +13,23 @@
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
     "android:run": "npm run build && npx cap sync android && npx cap open android",
-    "android:build": "npm run build && npx cap sync android && cd android && gradlew assembleRelease",
-    "android:bundle": "npm run build && npx cap sync android && cd android && gradlew bundleRelease",
+    "android:build": "npm run build && npx cap sync android && cd android && ./gradlew assembleRelease",
+    "android:build:debug": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "android:bundle": "npm run build && npx cap sync android && cd android && ./gradlew bundleRelease",
     "android:build:win": "npm run build && npx cap sync android && cd android && gradlew.bat assembleRelease",
+    "android:build:debug:win": "npm run build && npx cap sync android && cd android && gradlew.bat assembleDebug",
     "android:bundle:win": "npm run build && npx cap sync android && cd android && gradlew.bat bundleRelease",
+    "android:clean": "cd android && ./gradlew clean",
+    "android:clean:win": "cd android && gradlew.bat clean",
+    "ios:init": "npx cap add ios",
     "ios:sync": "npm run build && npx cap sync ios",
     "ios:open": "npx cap open ios",
     "ios:run": "npm run build && npx cap sync ios && npx cap open ios",
+    "ios:build": "npm run build && npx cap sync ios && cd ios/App && xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath build/App.xcarchive archive",
+    "ios:export": "cp ios-setup/exportOptions.plist ios/App/exportOptions.plist && cd ios/App && xcodebuild -exportArchive -archivePath build/App.xcarchive -exportPath build -exportOptionsPlist exportOptions.plist",
     "mobile:sync": "npm run build && npx cap sync",
-    "mobile:update": "npx cap update"
+    "mobile:update": "npx cap update",
+    "mobile:doctor": "npx cap doctor"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
