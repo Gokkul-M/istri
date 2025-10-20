@@ -6,6 +6,35 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 
 ## Recent Changes
 
+**October 20, 2025 - Customer Ratings & Feedback System**
+
+*Customer Portal:*
+- Enhanced OrderDetails page with feedback submission to admin
+  - When customers submit ratings with feedback text, it creates a feedback entry in Firestore
+  - Feedback entries are visible to admins in the Complaints & Feedback page
+  - Maintains existing rating UI with star system and feedback textarea
+  - Feedback only created when customer provides text feedback along with rating
+
+*Admin Portal:*
+- Completely redesigned Complaints & Feedback page with tabs system
+  - Added "Disputes" tab showing all dispute tickets (existing functionality)
+  - Added "Customer Feedback" tab displaying all customer ratings and feedback
+  - Real-time feedback display with rating stars (1-5 scale) and feedback text
+  - Stats cards showing total, new, and reviewed feedback counts
+  - Admins can mark feedback as "reviewed" and add optional admin notes
+  - Collapsible cards for detailed view with order and launderer information
+  - Premium styling with gradient cards and modern UI components
+
+*System Architecture:*
+- Created `feedback` collection in Firestore for persistent feedback storage
+  - Feedback interface with fields: orderId, customerId, customerName, laundererId, rating, feedback, type, status, createdAt
+  - Status tracking: 'new' (just submitted) or 'reviewed' (admin has reviewed)
+  - Real-time synchronization using Firestore onSnapshot listeners
+- Added feedback CRUD operations to FirestoreService
+  - createFeedback, getAllFeedback, getFeedbackByStatus, updateFeedback, deleteFeedback methods
+  - Proper timestamp handling and type safety
+- Updated FIRESTORE_RULES.md with feedback security rules (requires manual deployment to Firebase Console)
+
 **October 20, 2025 - Settings & Sidebar Premium Enhancements**
 
 *Customer Portal:*
