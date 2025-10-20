@@ -184,23 +184,37 @@ const BusinessProfile = () => {
       </div>
 
       <div className="px-6 space-y-4">
-        {/* Member Info & Status */}
+        {/* Profile Information */}
         <Card className="rounded-3xl p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-primary" />
-              Account Status
-            </h3>
-            <Badge className="bg-green-500 text-white px-3 py-1 rounded-full">
-              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-              Active
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Member since <span className="font-semibold text-foreground">{memberSince}</span>
-            </p>
+          <h3 className="font-bold mb-4 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-primary" />
+            Profile Information
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Member since:</span>
+              </div>
+              <span className="text-sm font-semibold">{memberSince}</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Role:</span>
+              </div>
+              <span className="text-sm font-semibold">Launderer</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Status:</span>
+              </div>
+              <Badge className="bg-green-500 text-white px-3 py-1 rounded-full">
+                <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+                Active
+              </Badge>
+            </div>
           </div>
         </Card>
 
