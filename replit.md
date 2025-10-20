@@ -6,6 +6,20 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 
 ## Recent Changes
 
+**October 20, 2025 - Customer Sidebar Enhancement**
+
+*Customer Portal:*
+- Completely redesigned sidebar with premium modern styling
+- Enhanced profile section with larger avatar, online status indicator, and better stat cards
+- Added gradient backgrounds and glass-morphism effects throughout
+- Implemented section headers ("Main Menu" and "More") for better organization
+- Added notification badge to sidebar navigation item showing unread count
+- Enhanced navigation items with gradient icon backgrounds and smooth hover effects
+- Added visual separator between main navigation and secondary options
+- Improved logout button styling with gradient background
+- Better spacing, typography, and rounded corners (1.25rem) for all elements
+- Added subtle border and backdrop blur for premium feel
+
 **October 19, 2025 - UI/UX Enhancements & Notification System Implementation**
 
 *Customer Portal:*

@@ -68,100 +68,132 @@ const CustomerDashboard = () => {
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] p-0">
-              <div className="flex flex-col h-full bg-background">
+            <SheetContent side="left" className="w-[300px] p-0 border-r border-border/50">
+              <div className="flex flex-col h-full bg-gradient-to-b from-background to-background/95">
                 {/* Profile Section */}
-                <div className="gradient-primary p-6 rounded-br-3xl">
+                <div className="gradient-primary rounded-br-[2rem] p-6 pb-8 shadow-soft">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <User className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-medium border border-white/30">
+                        <User className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-white shadow-sm"></div>
                     </div>
-                    <div>
-                      <h2 className="text-white font-bold text-lg">{user?.name || "Guest"}</h2>
-                      <p className="text-white/80 text-sm">{user?.email || user?.phone || ""}</p>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-white font-bold text-lg leading-tight mb-1 truncate">{user?.name || "Guest"}</h2>
+                      <p className="text-white/80 text-xs truncate">{user?.email || user?.phone || "Welcome back"}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                      <p className="text-white/70 text-xs">Total Orders</p>
-                      <p className="text-white font-bold text-lg">{ordersLoading ? "..." : orders.length}</p>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/15 backdrop-blur-sm rounded-[1.25rem] p-3.5 border border-white/20 shadow-sm">
+                      <p className="text-white/70 text-xs font-medium mb-1">Total Orders</p>
+                      <p className="text-white font-bold text-xl">{ordersLoading ? "..." : orders.length}</p>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                      <p className="text-white/70 text-xs">Total Spent</p>
-                      <p className="text-white font-bold text-lg">₹{ordersLoading ? "..." : totalSpent}</p>
+                    <div className="bg-white/15 backdrop-blur-sm rounded-[1.25rem] p-3.5 border border-white/20 shadow-sm">
+                      <p className="text-white/70 text-xs font-medium mb-1">Total Spent</p>
+                      <p className="text-white font-bold text-xl">₹{ordersLoading ? "..." : totalSpent}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4">
-                  <div className="space-y-1">
+                <nav className="flex-1 p-5 overflow-y-auto">
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-3">Main Menu</p>
+                    
                     <Link
                       to="/customer"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-primary/10 transition-all group"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-primary/10 active:bg-primary/15 transition-all group"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center group-hover:from-primary/20 group-hover:to-primary/10 transition-all shadow-sm">
                         <Home className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="font-semibold text-foreground">Home</span>
+                      <span className="font-semibold text-foreground tracking-tight">Home</span>
                     </Link>
 
                     <Link
                       to="/customer/new-order"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-secondary/10 transition-all group"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-secondary/10 active:bg-secondary/15 transition-all group"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-secondary/15 to-secondary/5 flex items-center justify-center group-hover:from-secondary/20 group-hover:to-secondary/10 transition-all shadow-sm">
                         <Plus className="w-5 h-5 text-secondary" />
                       </div>
-                      <span className="font-semibold text-foreground">New Order</span>
+                      <span className="font-semibold text-foreground tracking-tight">New Order</span>
                     </Link>
 
                     <Link
                       to="/customer/orders"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-accent/10 transition-all group"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-accent/10 active:bg-accent/15 transition-all group"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-accent/15 to-accent/5 flex items-center justify-center group-hover:from-accent/20 group-hover:to-accent/10 transition-all shadow-sm">
                         <Clock className="w-5 h-5 text-accent" />
                       </div>
-                      <span className="font-semibold text-foreground">Order History</span>
+                      <span className="font-semibold text-foreground tracking-tight">Order History</span>
                     </Link>
 
                     <Link
-                      to="/customer/offers"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-tertiary/10 transition-all group"
+                      to="/customer/notifications"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-orange-500/10 active:bg-orange-500/15 transition-all group relative"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-orange-500/15 to-orange-500/5 flex items-center justify-center group-hover:from-orange-500/20 group-hover:to-orange-500/10 transition-all shadow-sm">
+                        <Bell className="w-5 h-5 text-orange-600" />
+                        {unreadNotifications > 0 && (
+                          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                            {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between flex-1">
+                        <span className="font-semibold text-foreground tracking-tight">Notifications</span>
+                        {unreadNotifications > 0 && (
+                          <Badge className="bg-red-500/15 text-red-700 border-0 text-xs px-2">
+                            {unreadNotifications}
+                          </Badge>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="h-px bg-border/50 my-4"></div>
+                    
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-3 mt-4">More</p>
+
+                    <Link
+                      to="/customer/offers"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-tertiary/10 active:bg-tertiary/15 transition-all group"
+                    >
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-tertiary/15 to-tertiary/5 flex items-center justify-center group-hover:from-tertiary/20 group-hover:to-tertiary/10 transition-all shadow-sm">
                         <Tag className="w-5 h-5 text-tertiary" />
                       </div>
-                      <span className="font-semibold text-foreground">Offers & Deals</span>
+                      <span className="font-semibold text-foreground tracking-tight">Offers & Deals</span>
                     </Link>
 
                     <Link
                       to="/customer/settings"
-                      className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted transition-all group"
+                      className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-muted active:bg-muted/80 transition-all group"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">
+                      <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center group-hover:from-muted group-hover:to-muted/70 transition-all shadow-sm">
                         <SettingsIcon className="w-5 h-5 text-foreground" />
                       </div>
-                      <span className="font-semibold text-foreground">Settings</span>
+                      <span className="font-semibold text-foreground tracking-tight">Settings</span>
                     </Link>
                   </div>
                 </nav>
 
                 {/* Logout Button */}
-                <div className="p-4 border-t border-border">
+                <div className="p-5 border-t border-border/50 bg-background/50 backdrop-blur-sm">
                   <button 
                     onClick={async () => {
                       await signOut();
                       navigate('/login');
                     }}
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-500/10 transition-all w-full group"
+                    className="flex items-center gap-4 px-3 py-3.5 rounded-[1.25rem] hover:bg-red-500/10 active:bg-red-500/15 transition-all w-full group"
                     data-testid="button-logout"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                    <div className="w-11 h-11 rounded-[1rem] bg-gradient-to-br from-red-500/15 to-red-500/5 flex items-center justify-center group-hover:from-red-500/20 group-hover:to-red-500/10 transition-all shadow-sm">
                       <LogOut className="w-5 h-5 text-red-500" />
                     </div>
-                    <span className="font-semibold text-red-500">Logout</span>
+                    <span className="font-bold text-red-500 tracking-tight">Logout</span>
                   </button>
                 </div>
               </div>
