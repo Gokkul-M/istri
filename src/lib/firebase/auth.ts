@@ -9,6 +9,9 @@ import {
   signInWithCredential,
   deleteUser,
   User as FirebaseUser,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from 'firebase/auth';
 import { auth } from './config';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -78,6 +81,38 @@ export class AuthService {
       await firebaseSignOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
+    }
+  }
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user is currently signed in');
+      }
+
+      // Get user email
+      const email = user.email;
+      if (!email) {
+        throw new Error('User email not found');
+      }
+
+      // Re-authenticate user with current password
+      const credential = EmailAuthProvider.credential(email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update to new password
+      await updatePassword(user, newPassword);
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      if (error.code === 'auth/wrong-password') {
+        throw new Error('Current password is incorrect');
+      } else if (error.code === 'auth/weak-password') {
+        throw new Error('New password is too weak. Please use at least 6 characters');
+      } else if (error.code === 'auth/requires-recent-login') {
+        throw new Error('Please log out and log in again before changing your password');
+      }
       throw error;
     }
   }
