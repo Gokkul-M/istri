@@ -239,6 +239,20 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && 
                        (resource.data.userId == getCustomId() || isAdmin());
     }
+    
+    // Feedback - customers can create, admins can read and update
+    match /feedback/{feedbackId} {
+      // Customers can read their own feedback, admins can read all
+      allow read: if isAuthenticated() && 
+                     (resource.data.customerId == getCustomId() || isAdmin());
+      // Customers can create feedback for their own orders
+      allow create: if isAuthenticated() && 
+                       request.resource.data.customerId == getCustomId();
+      // Admins can update feedback (for review status and notes)
+      allow update: if isAdmin();
+      // Only admins can delete feedback
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
