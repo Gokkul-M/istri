@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Camera, Save, MapPin, Phone, Mail, Clock, TrendingUp, DollarSign, Star, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Camera, Save, MapPin, Phone, Mail, Clock, TrendingUp, DollarSign, Star, Package, Calendar, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useStore } from "@/store/useStore";
 import { useProfile } from "@/hooks/useProfile";
 import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
+import { format } from "date-fns";
 
 const BusinessProfile = () => {
   const { toast } = useToast();
@@ -42,7 +44,9 @@ const BusinessProfile = () => {
   }, [profile]);
 
   const businessStats = useMemo(() => {
-    const completedOrders = orders.filter(o => o.status === "completed");
+    // Filter orders for this launderer only
+    const myOrders = orders.filter(o => o.laundererId === currentUser?.id);
+    const completedOrders = myOrders.filter(o => o.status === "completed");
     const totalRevenue = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
     
     const ordersWithRatings = completedOrders.filter(order => order.rating && order.rating > 0);
@@ -51,12 +55,40 @@ const BusinessProfile = () => {
       : '0';
     
     return {
-      totalOrders: orders.length,
+      totalOrders: myOrders.length,
       completedOrders: completedOrders.length,
       totalRevenue,
       averageRating,
+      ratingsCount: ordersWithRatings.length,
     };
-  }, [orders]);
+  }, [orders, currentUser?.id]);
+
+  const memberSince = useMemo(() => {
+    if (!profile?.createdAt) return 'N/A';
+    try {
+      let date: Date;
+      const createdAt = profile.createdAt as any;
+      
+      // Handle Firestore Timestamp object
+      if (createdAt?.seconds) {
+        date = new Date(createdAt.seconds * 1000);
+      } 
+      // Handle ISO string or Date object
+      else {
+        date = new Date(createdAt);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'N/A';
+      }
+      
+      return format(date, 'MMMM yyyy');
+    } catch (error) {
+      console.error('Error formatting member since date:', error);
+      return 'N/A';
+    }
+  }, [profile?.createdAt]);
 
   const handleSave = async () => {
     try {
@@ -152,6 +184,26 @@ const BusinessProfile = () => {
       </div>
 
       <div className="px-6 space-y-4">
+        {/* Member Info & Status */}
+        <Card className="rounded-3xl p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-primary" />
+              Account Status
+            </h3>
+            <Badge className="bg-green-500 text-white px-3 py-1 rounded-full">
+              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+              Active
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Member since <span className="font-semibold text-foreground">{memberSince}</span>
+            </p>
+          </div>
+        </Card>
+
         {/* Business Statistics */}
         <Card className="rounded-3xl p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10">
           <h3 className="font-bold mb-4 flex items-center gap-2">
@@ -159,33 +211,39 @@ const BusinessProfile = () => {
             Business Statistics
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-background/50 rounded-2xl p-4">
+            <div className="bg-background/50 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Package className="w-4 h-4 text-blue-500" />
                 <p className="text-xs text-muted-foreground">Total Orders</p>
               </div>
               <p className="text-2xl font-bold">{businessStats.totalOrders}</p>
             </div>
-            <div className="bg-background/50 rounded-2xl p-4">
+            <div className="bg-background/50 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Package className="w-4 h-4 text-green-500" />
+                <CheckCircle className="w-4 h-4 text-green-500" />
                 <p className="text-xs text-muted-foreground">Completed</p>
               </div>
               <p className="text-2xl font-bold">{businessStats.completedOrders}</p>
             </div>
-            <div className="bg-background/50 rounded-2xl p-4">
+            <div className="bg-background/50 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4 text-emerald-500" />
                 <p className="text-xs text-muted-foreground">Total Revenue</p>
               </div>
-              <p className="text-2xl font-bold">${businessStats.totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl font-bold">₹{businessStats.totalRevenue.toFixed(2)}</p>
             </div>
-            <div className="bg-background/50 rounded-2xl p-4">
+            <div className="bg-background/50 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-4 h-4 text-yellow-500" />
                 <p className="text-xs text-muted-foreground">Avg Rating</p>
               </div>
-              <p className="text-2xl font-bold">{businessStats.averageRating} ⭐</p>
+              <div className="flex items-baseline gap-1">
+                <p className="text-2xl font-bold">{businessStats.averageRating}</p>
+                <span className="text-lg">⭐</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {businessStats.ratingsCount} {businessStats.ratingsCount === 1 ? 'review' : 'reviews'}
+              </p>
             </div>
           </div>
         </Card>
