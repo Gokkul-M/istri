@@ -8,6 +8,59 @@ ShineCycle is a comprehensive laundry service platform designed to connect custo
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**October 20, 2025 - Launderer Disputes & Feedback Pages**
+
+Added two new pages to the launderer portal for viewing disputes and customer feedback:
+
+*Disputes Page (`/launderer/disputes`):*
+- Real-time dispute tracking filtered by launderer using `useFirebaseDisputes` hook
+- Displays dispute details: subject, description, status (open/in_progress/resolved/rejected), priority (low/medium/high)
+- Color-coded status badges (yellow/blue/green/red) and priority indicators
+- Shows resolution details and admin notes when available
+- Empty state with icon when no disputes exist
+- Premium card design with gradient backgrounds and rounded corners
+
+*Customer Feedback Page (`/launderer/feedback`):*
+- Real-time feedback filtered by launderer using Firebase `onSnapshot`
+- Statistics cards showing total reviews and average rating in header
+- 5-star rating display for each review
+- Shows customer name, order ID, feedback text, and admin notes
+- Chronologically sorted (newest first)
+- Empty state with icon when no feedback exists
+- Premium gradient header with statistics cards
+
+*Navigation Updates:*
+- Added "Support" section to LaundererDashboard sidebar
+- Disputes link with AlertCircle icon (yellow theme)
+- Customer Feedback link with MessageSquare icon (blue theme)
+- Consistent styling with existing navigation items
+
+*Routes Added:*
+- `/launderer/disputes` → LaundererDisputes component
+- `/launderer/feedback` → LaundererFeedback component
+
+**October 20, 2025 - Launderer Profile Pages Real-Time Data**
+
+Updated Profile page and BusinessProfile page with real-time Firebase data:
+
+*Profile Page (Profile.tsx):*
+- Updated Business Statistics card with real-time Firebase data
+- Member Since date with proper Firestore Timestamp handling
+- Rating displays real-time average from completed orders (filters by launderer ID)
+- All data auto-updates when new orders/ratings are added
+- Uses `useFirebaseOrders` hook with `useMemo` for efficient recalculation
+- Premium gradient card styling with pulsing indicator
+
+*BusinessProfile Page (BusinessProfile.tsx):*
+- Added Profile Information card displaying Member Since, Role, and Active status
+- Enhanced Business Statistics card with real-time updates (Total Orders, Completed Orders, Total Revenue in ₹, Average Rating with review count)
+- Stats filter orders by current launderer ID
+- All statistics update in real-time using `useFirebaseOrders` hook
+- Premium UI styling with gradient cards and rounded corners
+- No duplicate information between cards
+
 ## System Architecture
 
 ### Frontend Architecture
