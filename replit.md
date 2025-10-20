@@ -2,152 +2,7 @@
 
 ## Overview
 
-ShineCycle is a comprehensive laundry service platform connecting customers with laundry service providers for doorstep pickup and delivery. It offers business management tools for launderers and full administrative oversight. Key features include a mobile-first design, real-time order tracking, QR code verification, and role-based access control. The platform aims to streamline laundry operations, enhance user experience, and capture a significant share of the on-demand laundry market.
-
-## Recent Changes
-
-**October 20, 2025 - Launderer Business Profile Real-Time Enhancements**
-
-*Launderer Portal - Business Profile Page:*
-- Added new Profile Information card displaying:
-  - Member Since date with proper Firestore Timestamp handling (supports Timestamp objects, ISO strings, Date objects with validation)
-  - Role (displays "Launderer")
-  - Active status badge with pulsing indicator
-  - Clean list layout with icons, borders, and proper spacing
-- Enhanced Business Statistics card with real-time updates
-  - Stats now filter orders by current launderer ID (not all orders)
-  - Total Orders - shows launderer's total order count
-  - Completed Orders - shows completed order count
-  - Total Revenue - displays in ₹ (Indian Rupees) currency
-  - Average Rating - shows real-time rating with star emoji and review count (e.g., "4.5 ⭐ - 12 reviews")
-- All statistics update in real-time using useFirebaseOrders hook with useMemo dependencies
-- Premium UI styling with gradient cards (from-primary/10 to-secondary/10), shadow effects, and rounded corners (3xl)
-- No duplicate information between cards - Profile Information shows account details, Business Statistics shows performance metrics
-
-**October 20, 2025 - Customer Ratings & Feedback System**
-
-*Customer Portal:*
-- Enhanced OrderDetails page with feedback submission to admin
-  - When customers submit ratings with feedback text, it creates a feedback entry in Firestore
-  - Feedback entries are visible to admins in the Complaints & Feedback page
-  - Maintains existing rating UI with star system and feedback textarea
-  - Feedback only created when customer provides text feedback along with rating
-
-*Admin Portal:*
-- Completely redesigned Complaints & Feedback page with tabs system
-  - Added "Disputes" tab showing all dispute tickets (existing functionality)
-  - Added "Customer Feedback" tab displaying all customer ratings and feedback
-  - Real-time feedback display with rating stars (1-5 scale) and feedback text
-  - Stats cards showing total, new, and reviewed feedback counts
-  - Admins can mark feedback as "reviewed" and add optional admin notes
-  - Collapsible cards for detailed view with order and launderer information
-  - Premium styling with gradient cards and modern UI components
-
-*System Architecture:*
-- Created `feedback` collection in Firestore for persistent feedback storage
-  - Feedback interface with fields: orderId, customerId, customerName, laundererId, rating, feedback, type, status, createdAt
-  - Status tracking: 'new' (just submitted) or 'reviewed' (admin has reviewed)
-  - Real-time synchronization using Firestore onSnapshot listeners
-- Added feedback CRUD operations to FirestoreService
-  - createFeedback, getAllFeedback, getFeedbackByStatus, updateFeedback, deleteFeedback methods
-  - Proper timestamp handling and type safety
-- Updated FIRESTORE_RULES.md with feedback security rules (requires manual deployment to Firebase Console)
-
-**October 20, 2025 - Settings & Sidebar Premium Enhancements**
-
-*Customer Portal:*
-- Completely redesigned Settings page with modern gradient cards and improved organization
-  - Implemented sections: Profile & Account, App Preferences, Orders, Privacy & Security
-  - Enhanced all dialogs (Password, Notifications, Permissions, Language) with premium styling
-  - Added real password change functionality using Firebase reauthentication and updatePassword API
-  - Password change includes validation, loading states, and comprehensive error handling
-  - All settings functionalities verified working: notifications, permissions, language, profile picture, delete account, logout
-  - Consistent 2rem border-radius, gradient backgrounds, and glass-morphism effects throughout
-- Completely redesigned sidebar with premium modern styling
-  - Enhanced profile section with larger avatar, online status indicator, and better stat cards
-  - Added gradient backgrounds and glass-morphism effects throughout
-  - Implemented section headers ("Main Menu" and "More") for better organization
-  - Added notification badge to sidebar navigation item showing unread count
-  - Enhanced navigation items with gradient icon backgrounds and smooth hover effects
-  - Added visual separator between main navigation and secondary options
-  - Improved logout button styling with gradient background
-  - Better spacing, typography, and rounded corners (1.25rem) for all elements
-  - Added subtle border and backdrop blur for premium feel
-
-*Launderer Portal:*
-- Enhanced sidebar with premium styling matching customer sidebar design
-  - Larger avatar (16x16) with online status indicator and glass-morphism backdrop
-  - Reorganized navigation into "Main Menu" and "More" sections
-  - Gradient icon backgrounds (11x11) with 1rem border-radius for all navigation items
-  - Enhanced stat cards showing weekly orders and rating with better styling
-  - Added visual separator between navigation sections
-  - Improved logout button with gradient background and bold styling
-  - Consistent spacing and overflow handling for better mobile experience
-
-*Admin Portal:*
-- Enhanced sidebar with premium styling and better organization
-  - Profile section with larger avatar, online status indicator, and stat cards (Total Users, Revenue)
-  - Reorganized navigation into "Main Menu" (Dashboard, Customers, Launderers, Orders) and "More" sections
-  - Gradient icon backgrounds for all navigation items with consistent 1rem border-radius
-  - Active state highlighting with enhanced gradient backgrounds
-  - Visual separator between main and secondary navigation
-  - Improved logout button styling matching other portals
-  - Better spacing, typography, and rounded corners throughout
-
-*Authentication:*
-- Added `changePassword` method to AuthService with Firebase reauthentication
-  - Uses EmailAuthProvider.credential for reauthentication
-  - Calls updatePassword with proper error handling
-  - Custom error messages for wrong-password, weak-password, and requires-recent-login errors
-  - Imported updatePassword, EmailAuthProvider, and reauthenticateWithCredential from Firebase Auth
-
-**October 19, 2025 - UI/UX Enhancements & Notification System Implementation**
-
-*Customer Portal:*
-- Fixed Order Again card navigation in Customer Dashboard (corrected route from `/customer/orders/:id` to `/customer/order/:id`)
-- Added profile picture upload functionality to Settings page with file validation and toast notifications
-- Enhanced OrderHistory page styling with gradient cards, improved spacing, and better mobile responsiveness
-- Enhanced OrderDetails page styling with consistent card design, better visual hierarchy, and improved mobile padding
-- Implemented real-time notification system displaying dispute resolutions with admin notes and resolution details
-- Added unread notification count to dashboard activity card with red badge indicator
-
-*Launderer Portal:*
-- Completely rebuilt OrderManagement page with real-time Firebase data integration
-- Removed all dummy data and connected to live order feeds filtered by launderer assignment
-- Implemented modern gradient card design with glass-morphism effects
-- Added clickable order cards that navigate to detailed order view
-- Included customer information (name, address) on order cards
-- Added real-time search functionality for customer names and order IDs
-- Implemented stat cards showing pending, active, ready, and completed order counts
-- Organized orders into tabs: All, Pending, Active, and Ready
-- Added empty states for each tab with contextual messaging
-- Enhanced order cards with pickup time, item count, and relative timestamps
-- All order data is real-time synced with Firebase using `useFirebaseOrders` hook
-- Updated LaundererDashboard to show only orders assigned to the logged-in launderer
-- Enhanced "Assigned Orders" section with clickable cards linking to order details
-- Enhanced "Recently Completed" section with real-time completed orders and customer ratings
-- Made order cards clickable while keeping Accept/Reject buttons functional
-- Added "View All" buttons when there are more than 3 orders in a section
-- Updated stat cards to show real-time counts for Total Orders, Revenue, and Active Orders
-
-*Admin Portal:*
-- Completely redesigned Dispute Resolution page with modern gradient cards and glass-morphism effects
-- Enhanced stats cards with color-coded gradients (yellow/open, blue/in-progress, green/resolved) and hover effects
-- Improved search input with better placeholder text and larger touch targets
-- Redesigned dispute cards with better visual hierarchy, separators, and enhanced information display
-- Added empty states for all tabs with contextual icons and messaging
-- Enhanced dialog modals with better spacing, rounded corners, and improved button layouts
-- Color-coded resolution/notes sections for better visual distinction
-- Automatic notification creation when disputes are resolved, sending admin notes and resolution to customers
-
-*System Architecture:*
-- Created notifications collection in Firestore for persistent notification storage
-- Implemented `useNotifications` hook for real-time notification updates
-- Added notification CRUD operations to FirestoreService
-- Integrated automatic notification trigger on dispute resolution
-- Updated FIRESTORE_RULES.md with notification security rules (requires manual deployment)
-
-All changes use real-time Firebase data through custom hooks
+ShineCycle is a comprehensive laundry service platform designed to connect customers with laundry service providers for doorstep pickup and delivery. It offers a mobile-first experience with real-time order tracking, QR code verification, and role-based access control. The platform aims to streamline laundry operations for providers, enhance customer convenience, and capture a significant share of the on-demand laundry market. It includes business management tools for launderers and full administrative oversight.
 
 ## User Preferences
 
@@ -157,79 +12,48 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 
-**Core Technology Stack:**
-- React 18 with TypeScript and Vite
-- Mobile-first responsive design using Tailwind CSS
-- shadcn/ui component library for consistent UI
+**Core Technology Stack:** React 18 with TypeScript and Vite, mobile-first responsive design using Tailwind CSS, and shadcn/ui for consistent UI components.
 
-**State Management:**
-- Zustand for global state, React Query for server state
-- Custom Firebase hooks for real-time data synchronization
+**State Management:** Zustand for global state, React Query for server state, and custom Firebase hooks for real-time data synchronization.
 
-**Navigation & Routing:**
-- React Router for client-side routing with role-based protection
-- Distinct user portals for Customer, Launderer, and Admin dashboards
+**Navigation & Routing:** React Router for client-side routing with role-based protection, supporting distinct user portals for Customer, Launderer, and Admin.
 
-**UI/UX Design Patterns:**
-- Gradient-based design system (dark navy, lavender, coral, teal)
-- Enhanced Switch components, Framer Motion for animations
-- Responsive bottom navigation for mobile
-- QR code generation/scanning for order verification
-- Real-time order status timeline with skeleton loading states
-- Gradient card backgrounds with backdrop blur for modern glass-morphism effect
-- Consistent rounded corners (2rem border-radius) across all cards
-- Hover effects (shadow-soft to shadow-medium transitions) for interactive elements
-- Mobile-optimized spacing (pb-20 for bottom navigation clearance)
+**UI/UX Design Patterns:** A gradient-based design system (dark navy, lavender, coral, teal), enhanced Switch components, Framer Motion for animations, responsive bottom navigation, QR code generation/scanning, real-time order status timelines with skeleton loading states, gradient card backgrounds with glass-morphism effects, consistent 2rem border-radius, and hover effects for interactive elements. Mobile-optimized spacing is maintained.
 
 ### Authentication & Authorization
 
-**Authentication Service:**
-- Firebase Authentication with email/password
-- Unified login/signup with role selection and profile completion flow
-- Role-based access control for Customer, Launderer, and Admin roles
-- Custom ID system (e.g., CUST-0001, LAUN-0001, ADMIN-0001) for users, with Firebase UID mapping.
+**Authentication Service:** Firebase Authentication with email/password, unified login/signup with role selection, and profile completion.
+
+**Authorization:** Role-based access control for Customer, Launderer, and Admin roles, with a custom ID system (e.g., CUST-0001) mapped to Firebase UIDs.
 
 ### Data Layer
 
-**Firebase Firestore Collections:**
-- `users` (profiles, roles, business details - uses custom IDs as document IDs)
-- `userSettings`, `orders`, `messages`, `services`, `coupons`, `disputes`
-- `counters`, `userMapping`, `customIdMapping` (for custom ID system)
-- Addresses subcollection (`users/{customId}/addresses`)
+**Firebase Firestore Collections:** `users` (profiles, roles, business details using custom IDs), `userSettings`, `orders`, `messages`, `services`, `coupons`, `disputes`, `feedback`, `notifications`, `counters`, `userMapping`, `customIdMapping`, and `addresses` as a subcollection.
 
-**Real-Time Data Synchronization:**
-- Custom hooks for live updates from Firestore using `onSnapshot`
-- Role-based query filters and Firestore Security Rules for data security
-- Critical Firestore composite indexes for efficient queries.
+**Real-Time Data Synchronization:** Custom hooks leverage `onSnapshot` for live updates, with role-based query filters and Firestore Security Rules ensuring data security. Critical Firestore composite indexes are used for efficient queries.
 
 ### File Storage
 
-**Firebase Storage:**
-- User avatar and business logo uploads in `profile-images/{userId}/{filename}`
-- Avatar upload integrated in customer Settings page with file type validation
-- Real-time profile picture updates via `useProfile` hook's `uploadProfileImage` function
+**Firebase Storage:** Used for user avatar and business logo uploads, organized in `profile-images/{userId}/{filename}`. Avatar upload is integrated into the customer Settings page with file type validation.
 
 ### Mobile App Support
 
-**Capacitor Integration:**
-- Native iOS and Android app capabilities using Capacitor plugins (Camera, Geolocation, Push, etc.)
-- Touch-optimized UI and native QR scanning.
+**Capacitor Integration:** Provides native iOS and Android app capabilities using Capacitor plugins (Camera, Geolocation, Push), featuring touch-optimized UI and native QR scanning.
 
 ### Order Management System
 
-**Order Workflow:**
-- Customer order creation (service, items, scheduling)
-- QR code generation for verification
-- Launderer acceptance/rejection and processing via scanner
-- Real-time status updates and invoice generation (PDF)
-- Post-completion rating and feedback.
+**Order Workflow:** Includes customer order creation (service, items, scheduling), QR code generation for verification, launderer acceptance/rejection and processing via scanner, real-time status updates, invoice generation (PDF), and post-completion rating and feedback.
 
 ### Admin Dashboard
 
-**Oversight Capabilities:**
-- Real-time metrics, user, service, and coupon management (CRUD)
-- Dispute resolution, order assignment
-- System-wide settings and announcements.
+**Oversight Capabilities:** Enables real-time metrics, CRUD operations for user, service, and coupon management, dispute resolution, order assignment, and system-wide settings/announcements. Features a redesigned Complaints & Feedback page with tabs for disputes and customer feedback, allowing admins to mark feedback as "reviewed" and add notes.
+
+### System Design Choices
+
+**Real-time Data:** Extensive use of real-time Firebase data through custom hooks across all portals for order management, statistics, notifications, and feedback.
+**Feedback System:** Implemented a `feedback` collection in Firestore for persistent storage, with CRUD operations and security rules.
+**Notification System:** `notifications` collection in Firestore for persistent storage, integrated with `useNotifications` hook for real-time updates and automatic triggers on events like dispute resolution.
+**Password Management:** Real password change functionality using Firebase reauthentication and `updatePassword` API, including validation and error handling.
 
 ## External Dependencies
 
