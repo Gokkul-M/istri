@@ -35,17 +35,21 @@ const LaundererDashboard = () => {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [processingOrders, setProcessingOrders] = useState<Set<string>>(new Set());
 
-  const pendingOrders = orders.filter(o => o.status === "confirmed");
-  const completedOrders = orders.filter(o => o.status === "completed");
-  const totalRevenue = orders
-    .filter(o => o.status === "completed")
-    .reduce((acc, order) => acc + order.totalAmount, 0);
+  // Filter orders assigned to this launderer
+  const myOrders = orders.filter(o => o.laundererId === user?.id);
+  
+  const pendingOrders = myOrders.filter(o => o.status === "confirmed");
+  const activeOrders = myOrders.filter(o => 
+    o.status === "picked_up" || o.status === "in_progress" || o.status === "ready"
+  );
+  const completedOrders = myOrders.filter(o => o.status === "completed");
+  const totalRevenue = completedOrders.reduce((acc, order) => acc + order.totalAmount, 0);
 
   const weeklyOrders = useMemo(() => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     
-    return orders.filter(order => {
+    return myOrders.filter(order => {
       if (!order.createdAt) return false;
       try {
         const orderDate = new Date(order.createdAt as any);
@@ -54,7 +58,7 @@ const LaundererDashboard = () => {
         return false;
       }
     }).length;
-  }, [orders]);
+  }, [myOrders]);
 
   const averageRating = useMemo(() => {
     const ordersWithRatings = completedOrders.filter(order => order.rating && order.rating > 0);
@@ -120,9 +124,9 @@ const LaundererDashboard = () => {
   };
 
   const stats = [
-    { label: "Total Orders", value: orders.length.toString(), icon: Package, color: "text-tertiary" },
-    { label: "Revenue", value: `₹${(totalRevenue / 1000).toFixed(1)}K`, icon: TrendingUp, color: "text-accent" },
-    { label: "Pending", value: pendingOrders.length.toString(), icon: Clock, color: "text-secondary" },
+    { label: "Total Orders", value: myOrders.length.toString(), icon: Package, color: "text-tertiary" },
+    { label: "Revenue", value: totalRevenue >= 1000 ? `₹${(totalRevenue / 1000).toFixed(1)}K` : `₹${totalRevenue}`, icon: TrendingUp, color: "text-accent" },
+    { label: "Active", value: (pendingOrders.length + activeOrders.length).toString(), icon: Clock, color: "text-secondary" },
   ];
 
   return (
@@ -291,119 +295,171 @@ const LaundererDashboard = () => {
           </Link>
         </div>
 
-        {/* Pending Orders */}
+        {/* Assigned Orders */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Assigned Orders</h2>
-            <Badge className="bg-accent/20 text-accent" data-testid="badge-pending-count">
-              {pendingOrders.length} Active
-            </Badge>
+            <h2 className="text-xl font-bold tracking-tight">Assigned Orders</h2>
+            <Link to="/launderer/orders">
+              <Badge className="bg-accent/15 text-accent hover:bg-accent/20 transition-colors cursor-pointer" data-testid="badge-pending-count">
+                {pendingOrders.length} Pending
+              </Badge>
+            </Link>
           </div>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : pendingOrders.length === 0 ? (
-            <Card className="rounded-3xl p-8 text-center border-border/50">
-              <Package className="w-12 h-12 mx-auto mb-2 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground" data-testid="text-no-orders">No pending orders</p>
+            <Card className="rounded-[2rem] p-12 text-center border-border/30 bg-gradient-to-br from-background to-background/50 shadow-soft">
+              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Package className="w-10 h-10 text-muted-foreground opacity-50" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No Pending Orders</h3>
+              <p className="text-sm text-muted-foreground" data-testid="text-no-orders">Orders assigned by admin will appear here</p>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {pendingOrders.map((order) => (
-                <Card key={order.id} className="rounded-3xl p-5 border-border/50" data-testid={`card-order-${order.id}`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1" data-testid={`text-order-id-${order.id}`}>
-                        {order.id}
-                      </p>
-                      <h3 className="font-semibold text-lg" data-testid={`text-customer-${order.id}`}>
-                        {order.customerName}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {order.items.map(i => i.serviceName).join(", ")}
-                      </p>
+            <div className="space-y-4">
+              {pendingOrders.slice(0, 3).map((order) => (
+                <Link key={order.id} to={`/launderer/order/${order.id}`}>
+                  <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium hover-lift transition-all cursor-pointer bg-gradient-to-br from-background to-background/50" data-testid={`card-order-${order.id}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="text-xs text-muted-foreground font-medium" data-testid={`text-order-id-${order.id}`}>
+                            #{order.id.slice(-8).toUpperCase()}
+                          </p>
+                          <Badge className="bg-blue-500/15 text-blue-700 border-0 font-medium">
+                            {order.status.replace(/_/g, " ")}
+                          </Badge>
+                        </div>
+                        <h3 className="font-bold text-base mb-1" data-testid={`text-customer-${order.id}`}>
+                          {order.customerName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          {order.items.map(i => i.serviceName).join(", ")}
+                        </p>
+                      </div>
+                      <div className="text-right ml-3">
+                        <p className="font-bold text-primary text-lg" data-testid={`text-amount-${order.id}`}>
+                          ₹{order.totalAmount}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {order.items.reduce((acc, item) => acc + item.quantity, 0)} items
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary text-lg" data-testid={`text-amount-${order.id}`}>
-                        ₹{order.totalAmount}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {order.items.reduce((acc, item) => acc + item.quantity, 0)} items
-                      </p>
+                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/30">
+                      <p className="text-xs text-muted-foreground">Pickup: {order.pickupTime}</p>
+                      <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-xl h-8"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRejectOrder(order.id);
+                          }}
+                          disabled={processingOrders.has(order.id)}
+                          data-testid={`button-reject-${order.id}`}
+                        >
+                          {processingOrders.has(order.id) ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <X className="w-3.5 h-3.5 mr-1" />
+                              Reject
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="rounded-xl h-8 bg-green-600 hover:bg-green-700"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleAcceptOrder(order.id);
+                          }}
+                          disabled={processingOrders.has(order.id)}
+                          data-testid={`button-accept-${order.id}`}
+                        >
+                          {processingOrders.has(order.id) ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Check className="w-3.5 h-3.5 mr-1" />
+                              Accept
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-400">
-                      {order.status.replace(/_/g, " ")}
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl"
-                        onClick={() => handleRejectOrder(order.id)}
-                        disabled={processingOrders.has(order.id)}
-                        data-testid={`button-reject-${order.id}`}
-                      >
-                        {processingOrders.has(order.id) ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <X className="w-4 h-4 mr-1" />
-                            Reject
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-green-600 hover:bg-green-700"
-                        onClick={() => handleAcceptOrder(order.id)}
-                        disabled={processingOrders.has(order.id)}
-                        data-testid={`button-accept-${order.id}`}
-                      >
-                        {processingOrders.has(order.id) ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Check className="w-4 h-4 mr-1" />
-                            Accept
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               ))}
+              {pendingOrders.length > 3 && (
+                <Link to="/launderer/orders">
+                  <Button variant="outline" className="w-full rounded-[1.5rem] h-12">
+                    View All {pendingOrders.length} Orders
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </div>
 
         {/* Recent Completions */}
         <div>
-          <h2 className="text-xl font-bold mb-4">Recently Completed</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold tracking-tight">Recently Completed</h2>
+            {completedOrders.length > 0 && (
+              <Link to="/launderer/orders">
+                <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/20 transition-colors cursor-pointer">
+                  {completedOrders.length} Total
+                </Badge>
+              </Link>
+            )}
+          </div>
           {completedOrders.length === 0 ? (
-            <Card className="rounded-3xl p-5 border-border/50 text-center">
-              <p className="text-muted-foreground">No completed orders yet</p>
+            <Card className="rounded-[2rem] p-12 text-center border-border/30 bg-gradient-to-br from-background to-background/50 shadow-soft">
+              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-10 h-10 text-muted-foreground opacity-50" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No Completed Orders</h3>
+              <p className="text-sm text-muted-foreground">Completed orders will appear here</p>
             </Card>
           ) : (
             <div className="space-y-3">
               {completedOrders.slice(0, 3).map((order) => (
-                <Card key={order.id} className="rounded-3xl p-5 border-border/50" data-testid={`card-completed-${order.id}`}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-green-600" />
+                <Link key={order.id} to={`/launderer/order/${order.id}`}>
+                  <Card className="rounded-[2rem] p-5 border-border/30 shadow-soft hover:shadow-medium hover-lift transition-all cursor-pointer bg-gradient-to-br from-background to-background/50" data-testid={`card-completed-${order.id}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-[1.25rem] bg-green-500/15 flex items-center justify-center shadow-sm">
+                        <CheckCircle2 className="w-7 h-7 text-green-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-base">{order.customerName}</h3>
+                          {order.rating && order.rating > 0 && (
+                            <Badge className="bg-accent/15 text-accent border-0 text-xs">
+                              {order.rating} ⭐
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          {order.items.map(i => i.serviceName).join(", ")} • {order.items.reduce((acc, item) => acc + item.quantity, 0)} items
+                        </p>
+                      </div>
+                      <p className="font-bold text-primary text-lg shrink-0">₹{order.totalAmount}</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{order.customerName}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {order.items.map(i => i.serviceName).join(", ")} • {order.items.reduce((acc, item) => acc + item.quantity, 0)} items
-                      </p>
-                    </div>
-                    <p className="font-bold">₹{order.totalAmount}</p>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               ))}
+              {completedOrders.length > 3 && (
+                <Link to="/launderer/orders">
+                  <Button variant="outline" className="w-full rounded-[1.5rem] h-12">
+                    View All {completedOrders.length} Completed Orders
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </div>

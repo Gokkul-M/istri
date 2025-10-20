@@ -28,6 +28,12 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 - Added empty states for each tab with contextual messaging
 - Enhanced order cards with pickup time, item count, and relative timestamps
 - All order data is real-time synced with Firebase using `useFirebaseOrders` hook
+- Updated LaundererDashboard to show only orders assigned to the logged-in launderer
+- Enhanced "Assigned Orders" section with clickable cards linking to order details
+- Enhanced "Recently Completed" section with real-time completed orders and customer ratings
+- Made order cards clickable while keeping Accept/Reject buttons functional
+- Added "View All" buttons when there are more than 3 orders in a section
+- Updated stat cards to show real-time counts for Total Orders, Revenue, and Active Orders
 
 *Admin Portal:*
 - Completely redesigned Dispute Resolution page with modern gradient cards and glass-morphism effects
