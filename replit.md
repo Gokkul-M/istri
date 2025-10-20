@@ -6,6 +6,24 @@ ShineCycle is a comprehensive laundry service platform connecting customers with
 
 ## Recent Changes
 
+**October 20, 2025 - Launderer Business Profile Real-Time Enhancements**
+
+*Launderer Portal - Business Profile Page:*
+- Added real-time Account Status card with active status badge and pulsing indicator
+- Implemented "Member Since" date display with proper Firestore Timestamp handling
+  - Supports Firestore Timestamp objects (createdAt.seconds * 1000)
+  - Falls back to ISO strings and Date objects
+  - Includes validation and error handling
+  - Displays formatted date (e.g., "October 2025")
+- Enhanced Business Statistics card with real-time updates
+  - Stats now filter orders by current launderer ID (not all orders)
+  - Total Orders - shows launderer's total order count
+  - Completed Orders - shows completed order count
+  - Total Revenue - displays in ₹ (Indian Rupees) currency
+  - Average Rating - shows rating with star emoji and review count (e.g., "4.5 ⭐ - 12 reviews")
+- All statistics update in real-time using useFirebaseOrders hook with useMemo dependencies
+- Premium UI styling with gradient cards, shadow effects, and rounded corners
+
 **October 20, 2025 - Customer Ratings & Feedback System**
 
 *Customer Portal:*
