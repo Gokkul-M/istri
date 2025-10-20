@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,13 +8,16 @@ import { ArrowLeft, Camera, Briefcase, Mail, Phone, Save, MapPin, Loader2, Star 
 import { useToast } from "@/hooks/use-toast";
 import { useStore } from "@/store/useStore";
 import { useProfile } from "@/hooks/useProfile";
+import { useFirebaseOrders } from "@/hooks/useFirebaseOrders";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 const Profile = () => {
   const { toast } = useToast();
   const { currentUser } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { profile, loading, uploading, updateProfile, uploadProfileImage } = useProfile(currentUser?.id || null);
+  const { orders } = useFirebaseOrders();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +38,46 @@ const Profile = () => {
       });
     }
   }, [profile]);
+
+  // Calculate real-time rating from orders
+  const averageRating = useMemo(() => {
+    const myOrders = orders.filter(o => o.laundererId === currentUser?.id);
+    const completedOrders = myOrders.filter(o => o.status === "completed");
+    const ordersWithRatings = completedOrders.filter(order => order.rating && order.rating > 0);
+    
+    if (ordersWithRatings.length === 0) return '0.0';
+    
+    const avg = ordersWithRatings.reduce((acc, order) => acc + (order.rating || 0), 0) / ordersWithRatings.length;
+    return avg.toFixed(1);
+  }, [orders, currentUser?.id]);
+
+  // Format member since date properly
+  const memberSince = useMemo(() => {
+    if (!profile?.createdAt) return 'January 2025';
+    try {
+      let date: Date;
+      const createdAt = profile.createdAt as any;
+      
+      // Handle Firestore Timestamp object
+      if (createdAt?.seconds) {
+        date = new Date(createdAt.seconds * 1000);
+      } 
+      // Handle ISO string or Date object
+      else {
+        date = new Date(createdAt);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'January 2025';
+      }
+      
+      return format(date, 'MMMM yyyy');
+    } catch (error) {
+      console.error('Error formatting member since date:', error);
+      return 'January 2025';
+    }
+  }, [profile?.createdAt]);
 
   const handleSave = async () => {
     await updateProfile(formData);
@@ -196,7 +239,7 @@ const Profile = () => {
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="font-medium text-foreground">Member since:</span>
-              {profile?.createdAt?.toLocaleDateString() || 'January 2025'}
+              {memberSince}
             </p>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="font-medium text-foreground">Role:</span>
@@ -210,7 +253,7 @@ const Profile = () => {
               <span className="font-medium text-foreground">Rating:</span>
               <span className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold text-foreground">4.8</span>
+                <span className="font-semibold text-foreground">{averageRating}</span>
               </span>
             </p>
           </div>
