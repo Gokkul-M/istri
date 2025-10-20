@@ -79,7 +79,13 @@ const Disputes = () => {
               <ArrowLeft className="w-6 h-6" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold text-white">Disputes</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-white">Disputes</h1>
+            <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-white text-xs font-medium">Live</span>
+            </div>
+          </div>
           <div className="w-10" />
         </div>
         
