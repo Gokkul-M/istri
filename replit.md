@@ -1,8 +1,8 @@
-# ShineCycle - Laundry Service Platform
+# My Apt Partner - Laundry Service Platform
 
 ## Overview
 
-ShineCycle is a comprehensive laundry service platform designed to connect customers with laundry service providers for doorstep pickup and delivery. It offers a mobile-first experience with real-time order tracking, QR code verification, and role-based access control. The platform aims to streamline laundry operations for providers, enhance customer convenience, and capture a significant share of the on-demand laundry market. It includes business management tools for launderers and full administrative oversight.
+My Apt Partner is a comprehensive laundry service platform designed to connect customers with laundry service providers for doorstep pickup and delivery. It offers a mobile-first experience with real-time order tracking, QR code verification, and role-based access control. The platform aims to streamline laundry operations for providers, enhance customer convenience, and capture a significant share of the on-demand laundry market. It includes business management tools for launderers and full administrative oversight.
 
 ## User Preferences
 

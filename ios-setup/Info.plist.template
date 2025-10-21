@@ -2,137 +2,137 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Basic App Information -->
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>ShineCycle</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
-	
-	<!-- UI Configuration -->
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
-	
-	<!-- ===== CRITICAL PERMISSIONS FOR SHINECYCLE ===== -->
-	
-	<!-- Camera Permission (for QR code scanning and profile photos) -->
-	<key>NSCameraUsageDescription</key>
-	<string>ShineCycle needs camera access to scan QR codes for order verification and to update your profile picture.</string>
-	
-	<!-- Photo Library Permission (for profile photos and order documentation) -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>ShineCycle needs access to your photo library to update your profile picture and save order receipts.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>ShineCycle needs permission to save order receipts and invoices to your photo library.</string>
-	
-	<!-- Location Permission (for delivery tracking and address selection) -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>ShineCycle needs your location to show nearby laundry services and track delivery in real-time.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>ShineCycle uses your location to provide accurate delivery tracking and notify you when your laundry is nearby.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>ShineCycle uses your location to provide real-time delivery updates even when the app is in the background.</string>
-	
-	<!-- ===== NETWORK & CONNECTIVITY ===== -->
-	
-	<!-- Allow HTTP/HTTPS connections (required for Firebase) -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-		<!-- Allow connections to Firebase services -->
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>firebaseapp.com</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-			<key>googleapis.com</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-			<key>firebasestorage.app</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
-	</dict>
-	
-	<!-- ===== BACKGROUND MODES (for notifications and location tracking) ===== -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-		<string>location</string>
-	</array>
-	
-	<!-- ===== CAPACITOR CONFIGURATION ===== -->
-	<key>CapacitorNativeAppScheme</key>
-	<string>capacitor</string>
-	
-	<!-- ===== ADDITIONAL CONFIGURATIONS ===== -->
-	
-	<!-- Allow file sharing -->
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
-	
-	<!-- Status bar style -->
-	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleLightContent</string>
-	
-	<!-- Prevent screenshots (optional - for security) -->
-	<!-- Uncomment if you want to prevent screenshots
-	<key>UIApplicationSupportsShakeToUndo</key>
-	<false/>
-	-->
+        <!-- Basic App Information -->
+        <key>CFBundleDevelopmentRegion</key>
+        <string>$(DEVELOPMENT_LANGUAGE)</string>
+        <key>CFBundleDisplayName</key>
+        <string>My Apt Partner</string>
+        <key>CFBundleExecutable</key>
+        <string>$(EXECUTABLE_NAME)</string>
+        <key>CFBundleIdentifier</key>
+        <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundleName</key>
+        <string>$(PRODUCT_NAME)</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleShortVersionString</key>
+        <string>$(MARKETING_VERSION)</string>
+        <key>CFBundleVersion</key>
+        <string>$(CURRENT_PROJECT_VERSION)</string>
+        
+        <!-- UI Configuration -->
+        <key>LSRequiresIPhoneOS</key>
+        <true/>
+        <key>UILaunchStoryboardName</key>
+        <string>LaunchScreen</string>
+        <key>UIMainStoryboardFile</key>
+        <string>Main</string>
+        <key>UIRequiredDeviceCapabilities</key>
+        <array>
+                <string>armv7</string>
+        </array>
+        <key>UISupportedInterfaceOrientations</key>
+        <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationLandscapeLeft</string>
+                <string>UIInterfaceOrientationLandscapeRight</string>
+        </array>
+        <key>UISupportedInterfaceOrientations~ipad</key>
+        <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationPortraitUpsideDown</string>
+                <string>UIInterfaceOrientationLandscapeLeft</string>
+                <string>UIInterfaceOrientationLandscapeRight</string>
+        </array>
+        <key>UIViewControllerBasedStatusBarAppearance</key>
+        <true/>
+        
+        <!-- ===== CRITICAL PERMISSIONS FOR MY APT PARTNER ===== -->
+        
+        <!-- Camera Permission (for QR code scanning and profile photos) -->
+        <key>NSCameraUsageDescription</key>
+        <string>My Apt Partner needs camera access to scan QR codes for order verification and to update your profile picture.</string>
+        
+        <!-- Photo Library Permission (for profile photos and order documentation) -->
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>My Apt Partner needs access to your photo library to update your profile picture and save order receipts.</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>My Apt Partner needs permission to save order receipts and invoices to your photo library.</string>
+        
+        <!-- Location Permission (for delivery tracking and address selection) -->
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>My Apt Partner needs your location to show nearby laundry services and track delivery in real-time.</string>
+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>My Apt Partner uses your location to provide accurate delivery tracking and notify you when your laundry is nearby.</string>
+        <key>NSLocationAlwaysUsageDescription</key>
+        <string>My Apt Partner uses your location to provide real-time delivery updates even when the app is in the background.</string>
+        
+        <!-- ===== NETWORK & CONNECTIVITY ===== -->
+        
+        <!-- Allow HTTP/HTTPS connections (required for Firebase) -->
+        <key>NSAppTransportSecurity</key>
+        <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <false/>
+                <key>NSAllowsLocalNetworking</key>
+                <true/>
+                <!-- Allow connections to Firebase services -->
+                <key>NSExceptionDomains</key>
+                <dict>
+                        <key>firebaseapp.com</key>
+                        <dict>
+                                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                        </dict>
+                        <key>googleapis.com</key>
+                        <dict>
+                                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                        </dict>
+                        <key>firebasestorage.app</key>
+                        <dict>
+                                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                        </dict>
+                </dict>
+        </dict>
+        
+        <!-- ===== BACKGROUND MODES (for notifications and location tracking) ===== -->
+        <key>UIBackgroundModes</key>
+        <array>
+                <string>fetch</string>
+                <string>remote-notification</string>
+                <string>location</string>
+        </array>
+        
+        <!-- ===== CAPACITOR CONFIGURATION ===== -->
+        <key>CapacitorNativeAppScheme</key>
+        <string>capacitor</string>
+        
+        <!-- ===== ADDITIONAL CONFIGURATIONS ===== -->
+        
+        <!-- Allow file sharing -->
+        <key>UIFileSharingEnabled</key>
+        <true/>
+        <key>LSSupportsOpeningDocumentsInPlace</key>
+        <true/>
+        
+        <!-- Status bar style -->
+        <key>UIStatusBarStyle</key>
+        <string>UIStatusBarStyleLightContent</string>
+        
+        <!-- Prevent screenshots (optional - for security) -->
+        <!-- Uncomment if you want to prevent screenshots
+        <key>UIApplicationSupportsShakeToUndo</key>
+        <false/>
+        -->
 </dict>
 </plist>
