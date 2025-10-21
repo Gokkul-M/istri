@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.istri.laundry"
+    namespace "com.myaptpartner.laundry"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.istri.laundry"
+        applicationId "com.myaptpartner.laundry"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
